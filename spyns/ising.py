@@ -25,8 +25,15 @@ __date__ = "August 31, 2017"
 logger = logging.getLogger(__name__)
 
 
-class Ising:
-    
+class Ising(object):
+    """Monte Carlo simulation of the Ising model.
+
+    Parameters
+    ----------
+    n : int
+        Sets the number of sites in the square, three-dimensional Ising model.
+    """
+
     coords = []
     
     def __init__(self,n):
