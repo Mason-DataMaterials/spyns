@@ -1,14 +1,29 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright (c) Mason DataMaterials Group.
+# Distributed under the terms of the MIT License.
+
 """
 Created on Thu Aug 31 15:39:03 2017
 
 @author: ssilayi
 """
 
-import numpy as np
+import logging
 import math
 from random import *
+
+import numpy as np
+
+
+__author__ = "Swabir Silayi"
+__copyright__ = "Copyright 2017, Mason DataMaterials Group"
+__maintainer__ = "James Glasbrenner"
+__email__ = "jglasbr2@gmu.edu"
+__date__ = "August 31, 2017"
+
+
+logger = logging.getLogger(__name__)
+
 
 class Ising:
     
