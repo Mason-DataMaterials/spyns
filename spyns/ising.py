@@ -35,13 +35,8 @@ class Ising(object):
     """
 
     coords = []
-    
-    def __init__(self,n):
-        self.n = n
-        self.s = [[[1 for x in range(n)] for y in range(n)] for z in range (n)]
-        self.magnetization = n**3
-        
-    def __init__(self,n):
+
+    def __init__(self, n):
         self.n = n
         self.s = [[[1 for x in range(n)] for y in range(n)] for z in range (n)]
         self.magnetization = n**3
