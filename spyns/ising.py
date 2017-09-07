@@ -1,11 +1,21 @@
 # -*- coding: utf-8 -*-
+
 # Copyright (c) Mason DataMaterials Group.
 # Distributed under the terms of the MIT License.
 
-"""
-Created on Thu Aug 31 15:39:03 2017
+"""Monte Carlo simulations of the Ising model using the Metropolis algorithm.
 
-@author: ssilayi
+Notes
+-----
+Our code is an adaptation of the Ising model code example in chapter 7.7.1,
+pages 318–319, of *Annotated Algorithms in Python* [ann_algo_python]_.
+
+References
+----------
+.. [ann_algo_python] Massimo Di Pierro, *Annotated Algorithms in Python: With
+   Applications in Physics, Biology, and Finance*, 1st ed. (Experts4solutions,
+   Lexington, KY, 2014).
+
 """
 
 import logging
