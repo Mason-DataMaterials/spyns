@@ -98,7 +98,17 @@ class Ising(object):
         self.site_spin[index_x][index_y][index_z] = new_spin_value
 
     def configuration(self, h, t):
+        """Temporary docstring.
 
+        Parameters
+        ----------
+        h : float
+            Magnetic field
+
+        t : float
+            Temperature
+
+        """
         n = self.number_sites_along_xyz
         config = []
         for i in range(n):
@@ -113,7 +123,17 @@ class Ising(object):
         np.savetxt(tname, config)
 
     def step(self, t, h):
+        """Temporary docstring.
 
+        Parameters
+        ----------
+        h : float
+            Magnetic field
+
+        t : float
+            Temperature
+
+        """
         n = self.number_sites_along_xyz
         x, y, z = (
             random.randint(0, n - 1),
@@ -143,7 +163,7 @@ class Ising(object):
 
 
 def main():
-
+    """Temporary docstring."""
     ising = Ising(number_sites_along_xyz=10)
     steps = 25000
 
