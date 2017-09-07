@@ -10,7 +10,7 @@ Created on Thu Aug 31 15:39:03 2017
 
 import logging
 import math
-from random import *
+import random
 
 import numpy as np
 
@@ -32,51 +32,110 @@ class Ising(object):
     ----------
     n : int
         Sets the number of sites in the square, three-dimensional Ising model.
+
     """
 
     coords = []
 
-    def __init__(self, n):
+    def __init__(self, number_sites_along_xyz):
+        """Set the number of sites in the cubic lattice.
 
-        self.n = n
-        self.s = [[[1 for x in range(n)] for y in range(n)] for z in range(n)]
-        self.magnetization = n**3
+        Parameters
+        ----------
+        nsites_along_xyz : int
+            Sets the number of sites along each side of the cubic lattice.
+            Defines a lattice with total sites equal to nsites_along_xyz**3
 
-    def __getitem__(self, point):
+        """
+        self.number_sites_along_xyz = number_sites_along_xyz
+        self.site_spin = [
+            [
+                [1 for x in range(number_sites_along_xyz)]
+                for y in range(number_sites_along_xyz)
+            ]
+            for z in range(number_sites_along_xyz)
+        ]
+        self.magnetization = number_sites_along_xyz**3
 
-        n = self.n
-        x, y, z = point
+    def __getitem__(self, site_index):
+        """Return the spin value at the specified site index.
 
-        return self.s[(x + n) % n][(y + n) % n][(z + n) % n]
+        Parameters
+        ----------
+        site_index : int
+            A site index from 0 to number_sites_along_xyz**3
 
-    def __setitem__(self, point, value):
+        """
+        number_sites_along_xyz = self.number_sites_along_xyz
+        site_x, site_y, site_z = site_index
 
-        n = self.n
-        x, y, z = point
-        self.s[(x + n) % n][(y + n) % n][(z + n) % n] = value
+        index_x = (site_x + number_sites_along_xyz) % number_sites_along_xyz
+        index_y = (site_y + number_sites_along_xyz) % number_sites_along_xyz
+        index_z = (site_z + number_sites_along_xyz) % number_sites_along_xyz
+
+        return self.site_spin[index_x][index_y][index_z]
+
+    def __setitem__(self, site_index, new_spin_value):
+        """Set the spin value at the specified site index.
+
+        Parameters
+        ----------
+        site_index : int
+            A site index from 0 to number_sites_along_xyz**3
+
+        new_spin_value : int
+            In the Ising model, the spin value is restricted to values of 1
+            or -1
+
+        """
+        number_sites_along_xyz = self.number_sites_along_xyz
+        site_x, site_y, site_z = site_index
+
+        index_x = (site_x + number_sites_along_xyz) % number_sites_along_xyz
+        index_y = (site_y + number_sites_along_xyz) % number_sites_along_xyz
+        index_z = (site_z + number_sites_along_xyz) % number_sites_along_xyz
+
+        self.site_spin[index_x][index_y][index_z] = new_spin_value
 
     def configuration(self, h, t):
 
-        n = self.n
+        n = self.number_sites_along_xyz
         config = []
         for i in range(n):
             for j in range(n):
                 for k in range(n):
-                    cnfg = np.array([i, j, k, self.s[i][j][k]])
+                    cnfg = np.array(
+                        [i, j, k, self.site_spin[i][j][k]]
+                    )
                     config.append(cnfg)
 
-        tname = "h=" + str(h) + "/configurations/t=" + str(t) + ".txt"
+        tname = "h={0}/configurations/t={1}.txt".format(str(h), str(t))
         np.savetxt(tname, config)
 
     def step(self, t, h):
 
-        n = self.n
-        x, y, z = randint(0, n - 1), randint(0, n - 1), randint(0, n - 1)
-        neighbors = [(x - 1, y, z), (x + 1, y, z), (x, y - 1, z),
-                     (x, y - 1, z), (x, y, z - 1), (x, y, z + 1)]
-        dE = -2.0 * self[x, y, z] * \
-            (h + sum(self[xn, yn, zn] for xn, yn, zn in neighbors))
-        if dE > t * math.log(random()):
+        n = self.number_sites_along_xyz
+        x, y, z = (
+            random.randint(0, n - 1),
+            random.randint(0, n - 1),
+            random.randint(0, n - 1)
+        )
+        neighbors = [
+            (x - 1, y, z),
+            (x + 1, y, z),
+            (x, y - 1, z),
+            (x, y - 1, z),
+            (x, y, z - 1),
+            (x, y, z + 1)
+        ]
+        dE = (
+            -2.0 * self[x, y, z] * (
+                h + sum(self[xn, yn, zn] for xn, yn, zn in neighbors)
+            )
+        )
+
+        if dE > t * math.log(random.random()):
+
             self[x, y, z] = -self[x, y, z]
             self.magnetization += 2 * self[x, y, z]
 
@@ -85,19 +144,26 @@ class Ising(object):
 
 def main():
 
-    ising = Ising(n=10)
+    ising = Ising(number_sites_along_xyz=10)
     steps = 25000
+
     for h in range(1, 11):
+
         data = []
+
         for t in range(1, 11):
+
             m = [ising.step(t=float(t), h=float(h)) for k in range(steps)]
             print(h, t)
             mu = np.mean(m)
             sigma = np.std(m)
+
             ising.configuration(t=t, h=h)
             x = (t, mu, sigma)
             data.append(x)
-            #fname = str(t)+".txt"
-            #np.savetxt(fname, np.array(m))
+
+            # fname = str(t)+".txt"
+            # np.savetxt(fname, np.array(m))
+
         fname = "h=" + str(h) + "/mg.txt"
         np.savetxt(fname, data)
