@@ -8,7 +8,10 @@
 Notes
 -----
 Our code is an adaptation of the Ising model code example in chapter 7.7.1,
-pages 318–319, of *Annotated Algorithms in Python* [ann_algo_python]_.
+pages 318–319, of *Annotated Algorithms in Python* [ann_algo_python]_,
+which was released under the BSDv3 License. The starting code remains under
+that license, while all subsequent changes and new features are released under
+the MIT license.
 
 References
 ----------
