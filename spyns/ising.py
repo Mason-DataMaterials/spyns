@@ -62,8 +62,7 @@ class Ising(object):
             [
                 [1 for x in range(number_sites_along_xyz)]
                 for y in range(number_sites_along_xyz)
-            ]
-            for z in range(number_sites_along_xyz)
+            ] for z in range(number_sites_along_xyz)
         ]
         self.magnetization = number_sites_along_xyz**3
 
@@ -124,9 +123,7 @@ class Ising(object):
         for i in range(n):
             for j in range(n):
                 for k in range(n):
-                    cnfg = np.array(
-                        [i, j, k, self.site_spin[i][j][k]]
-                    )
+                    cnfg = np.array([i, j, k, self.site_spin[i][j][k]])
                     config.append(cnfg)
 
         tname = "h={0}/configurations/t={1}.txt".format(str(h), str(t))
@@ -148,7 +145,7 @@ class Ising(object):
         x, y, z = (
             random.randint(0, n - 1),
             random.randint(0, n - 1),
-            random.randint(0, n - 1)
+            random.randint(0, n - 1),
         )
         neighbors = [
             (x - 1, y, z),
@@ -156,12 +153,11 @@ class Ising(object):
             (x, y - 1, z),
             (x, y - 1, z),
             (x, y, z - 1),
-            (x, y, z + 1)
+            (x, y, z + 1),
         ]
         dE = (
-            -2.0 * self[x, y, z] * (
-                h + sum(self[xn, yn, zn] for xn, yn, zn in neighbors)
-            )
+            -2.0 * self[x, y, z] *
+            (h + sum(self[xn, yn, zn] for xn, yn, zn in neighbors))
         )
 
         if dE > t * math.log(random.random()):
