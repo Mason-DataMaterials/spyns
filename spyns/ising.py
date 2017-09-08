@@ -197,7 +197,7 @@ class Ising(object):
             steps,
             temperature,
             external_field,
-            algorithm="slow_metropolis",
+            algorithm="metropolis",
     ):
         """Run the main loop of the Markov-chain Monte Carlo simulation.
 
@@ -247,9 +247,9 @@ class Ising(object):
         else:
             logger.info(
                 "{0} is not a recognized algorithm. Running Metropolis "
-                "(slow implementation) by default.".format(algorithm)
+                "algorithm by default.".format(algorithm)
             )
-            self._metropolis_algorithm_slow(
+            self._metropolis_algorithm(
                 steps=steps,
                 temperature=temperature,
                 external_field=external_field,
