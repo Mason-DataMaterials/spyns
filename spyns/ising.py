@@ -64,6 +64,8 @@ class Ising(object):
     def __getitem__(self, site_index):
         """Return the spin value at the specified site index.
 
+        Uses periodic boundaries for neighbors outside of grid.
+
         Parameters
         ----------
         site_index : int
@@ -81,6 +83,8 @@ class Ising(object):
 
     def __setitem__(self, site_index, new_spin_value):
         """Set the spin value at the specified site index.
+
+        Uses periodic boundaries for neighbors outside of grid.
 
         Parameters
         ----------
