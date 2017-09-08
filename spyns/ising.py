@@ -126,19 +126,16 @@ class Ising(object):
             temperature.
 
         """
-        magnetization_history = []
-
         logger.info(
             "Starting simulation run for t={0}, h={1}, steps={2}".
             format(temperature, external_field, steps)
         )
 
-        for _ in range(steps):
-            self.step(
-                temperature=float(temperature),
-                external_field=float(external_field),
-            )
-            magnetization_history.append(self.magnetization)
+        magnetization_history = self._monte_carlo_simulation(
+            steps=steps,
+            temperature=temperature,
+            external_field=external_field,
+        )
 
         mean_magnetization = np.mean(magnetization_history)
         std_dev_magnetization = np.std(magnetization_history)
@@ -148,90 +145,12 @@ class Ising(object):
             std_dev_magnetization,
         )
 
-        self.write_state_snapshot_to_disk(
+        self._write_state_snapshot_to_disk(
             temperature=temperature,
             external_field=external_field,
         )
 
         return simulation_statistics
-
-    def step(self, external_field, temperature):
-        """Advance the Monte Carlo simulation by one time step.
-
-        Parameters
-        ----------
-        external_field : float
-            External magnetic field in units of (check units)
-
-        temperature : float
-            System temperature in units of (check units)
-
-        """
-        site_x, site_y, site_z = self._select_spin_site()
-        neighbors = self._find_site_neighbors(site_x, site_y, site_z)
-        change_in_total_energy = self._calculate_spin_flip_energy(
-            site_x,
-            site_y,
-            site_z,
-            neighbors,
-            external_field,
-        )
-        self._keep_or_reject_spin_flip(
-            change_in_total_energy=change_in_total_energy,
-            temperature=temperature,
-            site_x=site_x,
-            site_y=site_y,
-            site_z=site_z,
-        )
-
-    def write_state_snapshot_to_disk(self, external_field, temperature):
-        """Save system state to output file.
-
-        Parameters
-        ----------
-        external_field : float
-            External magnetic field in units of (check units)
-
-        temperature : float
-            System temperature in units of (check units)
-
-        """
-        output_directory = (
-            Path(".").cwd() /
-            "results/h_{0}/configurations".format(external_field)
-        )
-        output_directory.mkdir(parents=True, exist_ok=True)
-        output_filename = output_directory / "t_{0}.csv".format(temperature)
-
-        state_full_system = []
-        column_names = ["site_x", "site_y", "site_z", "spin"]
-        self._gather_current_state(state_full_system)
-
-        _save_dataset_to_disk(
-            dataset=state_full_system,
-            column_names=column_names,
-            output_filename=output_filename,
-        )
-
-    def _calculate_spin_flip_energy(
-            self,
-            site_x,
-            site_y,
-            site_z,
-            neighbors,
-            external_field,
-    ):
-
-        site_spin = self[site_x, site_y, site_z]
-        neighbor_spins = []
-        for neighbor_x, neighbor_y, neighbor_z in neighbors:
-            neighbor_spins.append(self[neighbor_x, neighbor_y, neighbor_z])
-
-        change_in_total_energy = (
-            -2.0 * site_spin * (external_field + sum(neighbor_spins))
-        )
-
-        return change_in_total_energy
 
     def _gather_current_state(self, state_full_system):
 
@@ -243,33 +162,95 @@ class Ising(object):
                     )
                     state_full_system.append(state_single_site)
 
-    def _keep_or_reject_spin_flip(
+    def _metropolis_algorithm_slow(
             self,
-            change_in_total_energy,
+            steps,
             temperature,
-            site_x,
-            site_y,
-            site_z,
+            external_field,
+            magnetization_history,
     ):
 
-        if change_in_total_energy > temperature * math.log(random.random()):
+        for _ in range(steps):
+            self._sweep_metropolis_slow(
+                temperature=float(temperature),
+                external_field=float(external_field),
+            )
+            magnetization_history.append(self.magnetization)
 
-            self[site_x, site_y, site_z] = -self[site_x, site_y, site_z]
-            self.magnetization += 2 * self[site_x, site_y, site_z]
+    def _monte_carlo_simulation(
+            self,
+            steps,
+            temperature,
+            external_field,
+            algorithm="slow_metropolis",
+    ):
+        """Run the main loop of the Markov-chain Monte Carlo simulation.
 
-    def _select_spin_site(self):
+        Parameters
+        ----------
+        steps : int
+            Number of time steps to run the simulation.
 
+        temperature : float
+            System temperature in units of (check units)
+
+        external_field : float
+            External magnetic field in units of (check units)
+
+        algorithm : str
+            Selects the algorithm to use for the simulation. Currently
+            implemented:
+
+            * "slow_metropolis"
+
+        Returns
+        -------
+        magnetization_history : list of floats
+            List of total system magnetization at each simulation time step
+
+        """
+        magnetization_history = []
+
+        if algorithm == "slow_metropolis":
+            logger.info("Algorithm: Metropolis (slow implementation)")
+            self._metropolis_algorithm_slow(
+                steps=steps,
+                temperature=temperature,
+                external_field=external_field,
+                magnetization_history=magnetization_history,
+            )
+
+        else:
+            logger.info(
+                "{0} is not a recognized algorithm. Running Metropolis "
+                "(slow implementation) by default.".format(algorithm)
+            )
+            self._metropolis_algorithm_slow(
+                steps=steps,
+                temperature=temperature,
+                external_field=external_field,
+                magnetization_history=magnetization_history,
+            )
+
+        return magnetization_history
+
+    def _sweep_metropolis_slow(self, external_field, temperature):
+        """Single pass of Metropolis (slow) algorithm.
+
+        Parameters
+        ----------
+        external_field : float
+            External magnetic field in units of (check units)
+
+        temperature : float
+            System temperature in units of (check units)
+
+        """
         site_x, site_y, site_z = (
             random.randint(0, self.number_sites_along_xyz - 1),
             random.randint(0, self.number_sites_along_xyz - 1),
             random.randint(0, self.number_sites_along_xyz - 1),
         )
-
-        return site_x, site_y, site_z
-
-    @staticmethod
-    def _find_site_neighbors(site_x, site_y, site_z):
-
         neighbors = [
             (site_x - 1, site_y, site_z),
             (site_x + 1, site_y, site_z),
@@ -279,7 +260,54 @@ class Ising(object):
             (site_x, site_y, site_z + 1),
         ]
 
-        return neighbors
+        site_spin = self[site_x, site_y, site_z]
+        neighbor_spins = []
+        for neighbor_x, neighbor_y, neighbor_z in neighbors:
+            neighbor_spins.append(self[neighbor_x, neighbor_y, neighbor_z])
+
+        change_in_total_energy = (
+            -2.0 * site_spin * (external_field + sum(neighbor_spins))
+        )
+
+        if change_in_total_energy > temperature * math.log(random.random()):
+            self[site_x, site_y, site_z] = -self[site_x, site_y, site_z]
+            self.magnetization += 2 * self[site_x, site_y, site_z]
+
+    def _write_state_snapshot_to_disk(self, external_field, temperature):
+        """Save system state to output file.
+
+        Parameters
+        ----------
+        external_field : float
+            External magnetic field in units of (check units)
+
+        temperature : float
+            System temperature in units of (check units)
+
+        """
+        output_directory = Path(".").cwd() / "results"
+        output_directory.mkdir(parents=True, exist_ok=True)
+        output_filename = (
+            output_directory / "final_states.csv".format(temperature)
+        )
+
+        state_full_system = []
+        column_names = ["site_x", "site_y", "site_z", "spin"]
+        self._gather_current_state(state_full_system)
+
+        final_states_database = pd.DataFrame(
+            data=state_full_system,
+            columns=column_names,
+        )
+        final_states_database["temperature"] = temperature
+        final_states_database["external_field"] = external_field
+
+        _save_database_to_disk(
+            database=final_states_database,
+            output_filename=output_filename,
+            mode="append",
+            header=False if output_filename.exists() else True,
+        )
 
 
 def main(
@@ -305,11 +333,25 @@ def main(
     ising = Ising(number_sites_along_xyz=number_sites_along_xyz)
     column_names = [
         "temperature",
+        "external_field",
         "mean_magnetization",
         "std_dev_magnetization",
     ]
+    output_directory = Path(".").cwd() / "results"
+    output_directory.mkdir(parents=True, exist_ok=True)
+    output_filename = (
+        output_directory / "runs_magnetization_vs_temperature.csv"
+    )
+    number_simulations = (
+        (external_field_sweep_end - external_field_sweep_start) *
+        (temperature_sweep_end - temperature_sweep_start)
+    )
+    simulation_results_database = pd.DataFrame(
+        columns=column_names,
+        index=np.arange(number_simulations),
+    )
 
-    _external_field_sweep(
+    _external_field_and_temperature_sweep(
         ising=ising,
         steps=steps,
         column_names=column_names,
@@ -317,10 +359,16 @@ def main(
         external_field_sweep_end=external_field_sweep_end,
         temperature_sweep_start=temperature_sweep_start,
         temperature_sweep_end=temperature_sweep_end,
+        simulation_results_database=simulation_results_database,
+    )
+
+    _save_database_to_disk(
+        database=simulation_results_database,
+        output_filename=output_filename,
     )
 
 
-def _external_field_sweep(
+def _external_field_and_temperature_sweep(
         ising,
         steps,
         column_names,
@@ -328,17 +376,12 @@ def _external_field_sweep(
         external_field_sweep_end,
         temperature_sweep_start,
         temperature_sweep_end,
+        simulation_results_database,
 ):
-    for external_field in range(external_field_sweep_start,
-                                external_field_sweep_end):
-
+    number_temperature_sweeps = temperature_sweep_end - temperature_sweep_start
+    for loop_index, external_field in enumerate(iterable=range(
+            external_field_sweep_start, external_field_sweep_end), start=0):
         simulation_results = []
-
-        output_directory = (
-            Path(".").cwd() / "results/h_{0}".format(external_field)
-        )
-        output_directory.mkdir(parents=True, exist_ok=True)
-        output_filename = (output_directory / "mg.csv")
 
         _temperature_sweep(
             ising=ising,
@@ -349,24 +392,46 @@ def _external_field_sweep(
             sweep_end=temperature_sweep_end,
         )
 
-        _save_dataset_to_disk(
-            dataset=simulation_results,
-            column_names=column_names,
-            output_filename=output_filename,
+        simulation_count_start = loop_index * number_temperature_sweeps
+        simulation_count_end = (
+            simulation_count_start + number_temperature_sweeps - 1
         )
 
+        # yapf: disable
+        simulation_results_database.loc[
+            simulation_count_start:simulation_count_end,
+            ("temperature", "mean_magnetization", "std_dev_magnetization")
+        ] = simulation_results
+        simulation_results_database.loc[
+            simulation_count_start:simulation_count_end,
+            ("external_field")
+        ] = "h = {0}".format(external_field)
+        # yapf: enable
 
-def _save_dataset_to_disk(dataset, column_names, output_filename):
 
-    db = pd.DataFrame(
-        data=np.array(dataset),
-        columns=column_names,
-    )
+def _save_database_to_disk(
+        database,
+        output_filename,
+        mode="write",
+        header=True,
+):
 
-    db.to_csv(
-        path_or_buf="{0}".format(output_filename),
-        index=False,
-    )
+    if mode == "write":
+        database.to_csv(
+            path_or_buf="{0}.gz".format(output_filename),
+            index=False,
+            mode="w",
+            header=header,
+            compression="gzip",
+        )
+    elif mode == "append":
+        database.to_csv(
+            path_or_buf="{0}.gz".format(output_filename),
+            index=False,
+            mode="a",
+            header=header,
+            compression="gzip",
+        )
 
 
 def _temperature_sweep(
@@ -378,7 +443,6 @@ def _temperature_sweep(
         sweep_end,
 ):
     for temperature in range(sweep_start, sweep_end):
-
         simulation_statistics = ising.run_simulation(
             steps=steps,
             temperature=temperature,
