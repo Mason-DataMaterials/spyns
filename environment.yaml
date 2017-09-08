@@ -9,4 +9,5 @@ dependencies:
 - flake8=3.3.0=py36_0
 - ruamel.yaml=0.15.33=py36_0
 - tabulate=0.7.7=py36_0
+- yapf=0.17.0=py36_0
 
