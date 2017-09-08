@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-
-# Copyright (c) Mason DataMaterials Group.
-# Distributed under the terms of the MIT License.
-
 """Monte Carlo simulations of the Ising model using the Metropolis algorithm.
+
+Copyright (c) Mason DataMaterials Group.
+Distributed under the terms of the MIT License.
 
 Notes
 -----
@@ -27,13 +26,11 @@ import random
 
 import numpy as np
 
-
 __author__ = "Swabir Silayi"
 __copyright__ = "Copyright 2017, Mason DataMaterials Group"
 __maintainer__ = "James Glasbrenner"
 __email__ = "jglasbr2@gmu.edu"
 __date__ = "August 31, 2017"
-
 
 logger = logging.getLogger(__name__)
 
