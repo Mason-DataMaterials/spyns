@@ -20,11 +20,13 @@ References
 
 """
 
+from pathlib import Path
 import logging
 import math
 import random
 
 import numpy as np
+import pandas as pd
 
 __author__ = "Swabir Silayi"
 __copyright__ = "Copyright 2017, Mason DataMaterials Group"
@@ -111,16 +113,32 @@ class Ising(object):
             System temperature in units of (check units)
 
         """
-        n = self.number_sites_along_xyz
-        config = []
-        for i in range(n):
-            for j in range(n):
-                for k in range(n):
-                    cnfg = np.array([i, j, k, self.site_spin[i][j][k]])
-                    config.append(cnfg)
+        number_sites_along_xyz = self.number_sites_along_xyz
+        state_full_system = []
+        for i in range(number_sites_along_xyz):
+            for j in range(number_sites_along_xyz):
+                for k in range(number_sites_along_xyz):
+                    state_single_site = np.array(
+                        [i, j, k, self.site_spin[i][j][k]]
+                    )
+                    state_full_system.append(state_single_site)
 
-        tname = "h={0}/configurations/t={1}.txt".format(str(h), str(t))
-        np.savetxt(tname, config)
+        state_full_system = pd.DataFrame(
+            data=np.array(state_full_system),
+            columns=["site_x", "site_y", "site_z", "spin"]
+        )
+
+        output_directory = (
+            Path(".").cwd() /
+            "results/h_{0}/configurations".format(external_field)
+        )
+        output_directory.mkdir(parents=True, exist_ok=True)
+        output_filename = output_directory / "t_{0}.csv".format(temperature)
+
+        state_full_system.to_csv(
+            path_or_buf="{0}".format(output_filename),
+            index=False,
+        )
 
     def step(self, external_field, temperature):
         """Advance the Monte Carlo simulation by one time step.
@@ -135,54 +153,100 @@ class Ising(object):
 
         """
         n = self.number_sites_along_xyz
-        x, y, z = (
+        site_x, site_y, site_z = (
             random.randint(0, n - 1),
             random.randint(0, n - 1),
             random.randint(0, n - 1),
         )
         neighbors = [
-            (x - 1, y, z),
-            (x + 1, y, z),
-            (x, y - 1, z),
-            (x, y - 1, z),
-            (x, y, z - 1),
-            (x, y, z + 1),
+            (site_x - 1, site_y, site_z),
+            (site_x + 1, site_y, site_z),
+            (site_x, site_y - 1, site_z),
+            (site_x, site_y - 1, site_z),
+            (site_x, site_y, site_z - 1),
+            (site_x, site_y, site_z + 1),
         ]
-        dE = (
-            -2.0 * self[x, y, z] *
-            (h + sum(self[xn, yn, zn] for xn, yn, zn in neighbors))
+        change_in_total_energy = (
+            -2.0 * self[site_x, site_y, site_z] * (
+                external_field + sum(
+                    self[neighbor_x, neighbor_y, neighbor_z]
+                    for neighbor_x, neighbor_y, neighbor_z in neighbors
+                )
+            )
         )
 
-        if dE > t * math.log(random.random()):
+        if change_in_total_energy > temperature * math.log(random.random()):
 
-            self[x, y, z] = -self[x, y, z]
-            self.magnetization += 2 * self[x, y, z]
+            self[site_x, site_y, site_z] = -self[site_x, site_y, site_z]
+            self.magnetization += 2 * self[site_x, site_y, site_z]
 
         return self.magnetization
 
 
-def main():
-    """Temporary docstring."""
-    ising = Ising(number_sites_along_xyz=10)
-    steps = 25000
+def main(
+        number_sites_along_xyz=10,
+        steps=25000,
+        external_field_sweep_start=1,
+        external_field_sweep_end=11,
+        temperature_sweep_start=1,
+        temperature_sweep_end=11
+):
+    """Run Ising model simulation."""
+    ising = Ising(number_sites_along_xyz=number_sites_along_xyz)
 
-    for h in range(1, 11):
+    for external_field in range(external_field_sweep_start,
+                                external_field_sweep_end):
 
         data = []
 
-        for t in range(1, 11):
+        for temperature in range(temperature_sweep_start,
+                                 temperature_sweep_end):
 
-            m = [ising.step(t=float(t), h=float(h)) for k in range(steps)]
-            print(h, t)
-            mu = np.mean(m)
-            sigma = np.std(m)
+            magnetization_history = [
+                ising.step(
+                    temperature=float(temperature),
+                    external_field=float(external_field)
+                ) for k in range(steps)
+            ]
+            logger.info(external_field, temperature)
+            mean_magnetization = np.mean(magnetization_history)
+            std_dev_magnetization = np.std(magnetization_history)
 
-            ising.configuration(t=t, h=h)
-            x = (t, mu, sigma)
-            data.append(x)
+            ising.configuration(
+                temperature=temperature, external_field=external_field
+            )
+            simulation_statistics = (
+                temperature, mean_magnetization, std_dev_magnetization
+            )
+            data.append(simulation_statistics)
 
             # fname = str(t)+".txt"
             # np.savetxt(fname, np.array(m))
 
-        fname = "h=" + str(h) + "/mg.txt"
-        np.savetxt(fname, data)
+        data = pd.DataFrame(
+            data=np.array(data),
+            columns=[
+                "temperature",
+                "mean_magnetization",
+                "std_dev_magnetization",
+            ]
+        )
+
+        output_directory = (
+            Path(".").cwd() / "results/h_{0}".format(external_field)
+        )
+        output_directory.mkdir(parents=True, exist_ok=True)
+        output_filename = (output_directory / "mg.csv")
+
+        data.to_csv(path_or_buf="{0}".format(output_filename), index=False)
+
+
+if __name__ == '__main__':
+
+    number_sites_along_xyz = 10
+    steps = 25000
+
+    main(
+        number_sites_along_xyz=number_sites_along_xyz,
+        steps=steps,
+    )
