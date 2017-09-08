@@ -162,6 +162,21 @@ class Ising(object):
                     )
                     state_full_system.append(state_single_site)
 
+    def _metropolis_algorithm(
+            self,
+            steps,
+            temperature,
+            external_field,
+            magnetization_history,
+    ):
+
+        for _ in range(steps):
+            self._sweep_metropolis(
+                temperature=float(temperature),
+                external_field=float(external_field),
+            )
+            magnetization_history.append(self.magnetization)
+
     def _metropolis_algorithm_slow(
             self,
             steps,
@@ -211,7 +226,16 @@ class Ising(object):
         """
         magnetization_history = []
 
-        if algorithm == "slow_metropolis":
+        if algorithm == "metropolis":
+            logger.info("Algorithm: Metropolis")
+            self._metropolis_algorithm(
+                steps=steps,
+                temperature=temperature,
+                external_field=external_field,
+                magnetization_history=magnetization_history,
+            )
+
+        elif algorithm == "slow_metropolis":
             logger.info("Algorithm: Metropolis (slow implementation)")
             self._metropolis_algorithm_slow(
                 steps=steps,
@@ -233,6 +257,45 @@ class Ising(object):
             )
 
         return magnetization_history
+
+    def _sweep_metropolis(self, external_field, temperature):
+        """Single pass of Metropolis algorithm.
+
+        Parameters
+        ----------
+        external_field : float
+            External magnetic field in units of (check units)
+
+        temperature : float
+            System temperature in units of (check units)
+
+        """
+        site_x, site_y, site_z = (
+            random.randint(0, self.number_sites_along_xyz - 1),
+            random.randint(0, self.number_sites_along_xyz - 1),
+            random.randint(0, self.number_sites_along_xyz - 1),
+        )
+        neighbors = [
+            (site_x - 1, site_y, site_z),
+            (site_x + 1, site_y, site_z),
+            (site_x, site_y - 1, site_z),
+            (site_x, site_y - 1, site_z),
+            (site_x, site_y, site_z - 1),
+            (site_x, site_y, site_z + 1),
+        ]
+
+        site_spin = self[site_x, site_y, site_z]
+        neighbor_spins = []
+        for neighbor_x, neighbor_y, neighbor_z in neighbors:
+            neighbor_spins.append(self[neighbor_x, neighbor_y, neighbor_z])
+
+        change_in_total_energy = (
+            -2.0 * site_spin * (external_field + sum(neighbor_spins))
+        )
+
+        if change_in_total_energy > temperature * math.log(random.random()):
+            self[site_x, site_y, site_z] = -self[site_x, site_y, site_z]
+            self.magnetization += 2 * self[site_x, site_y, site_z]
 
     def _sweep_metropolis_slow(self, external_field, temperature):
         """Single pass of Metropolis (slow) algorithm.
