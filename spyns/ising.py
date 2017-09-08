@@ -128,14 +128,17 @@ class Ising(object):
         """
         magnetization_history = []
 
+        logger.info(
+            "Starting simulation run for t={0}, h={1}, steps={2}".
+            format(temperature, external_field, steps)
+        )
+
         for _ in range(steps):
             self.step(
                 temperature=float(temperature),
                 external_field=float(external_field),
             )
             magnetization_history.append(self.magnetization)
-
-        logger.info(msg="h={0}, t={1}".format(external_field, temperature))
 
         mean_magnetization = np.mean(magnetization_history)
         std_dev_magnetization = np.std(magnetization_history)
