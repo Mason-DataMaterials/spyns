@@ -20,6 +20,8 @@ References
 
 """
 
+from collections import Counter
+from itertools import combinations_with_replacement
 from pathlib import Path
 import logging
 import math
@@ -105,7 +107,14 @@ class Ising(object):
 
         self.site_spin[index_x][index_y][index_z] = new_spin_value
 
-    def run_simulation(self, steps, temperature, external_field):
+    def run_simulation(
+            self,
+            steps,
+            temperature,
+            external_field,
+            algorithm="metropolis",
+            seed=None,
+    ):
         """Run Monte Carlo simulation.
 
         Parameters
@@ -118,6 +127,16 @@ class Ising(object):
 
         temperature : float
             System temperature in units of (check units)
+
+        algorithm : str
+            Sets algorithm to use for Monte Carlo simulation. Currently
+            available:
+
+            * "metropolis"
+            * "slow_metropolis"
+
+        seed : int, array_like
+            Sets seed for random number generator
 
         Returns
         -------
@@ -135,6 +154,8 @@ class Ising(object):
             steps=steps,
             temperature=temperature,
             external_field=external_field,
+            algorithm=algorithm,
+            seed=seed,
         )
 
         mean_magnetization = np.mean(magnetization_history)
@@ -168,14 +189,46 @@ class Ising(object):
             temperature,
             external_field,
             magnetization_history,
+            random_number_generator,
     ):
 
-        for _ in range(steps):
+        random_number_array, probability_of_spin_flip = (
+            self._generate_random_number_sequence(
+                steps=steps,
+                random_number_generator=random_number_generator,
+            )
+        )
+
+        self._generate_lookup_tables(
+            external_field=external_field,
+            temperature=temperature,
+            number_of_neighbors=6,
+        )
+
+        for step_number in range(steps):
             self._sweep_metropolis(
-                temperature=float(temperature),
-                external_field=float(external_field),
+                temperature=temperature,
+                external_field=external_field,
+                random_number_array=random_number_array,
+                probability_of_spin_flip=probability_of_spin_flip,
+                step_number=step_number,
             )
             magnetization_history.append(self.magnetization)
+
+    def _generate_random_number_sequence(self, steps, random_number_generator):
+
+        random_number_array = random_number_generator.randint(
+            low=0,
+            high=self.number_sites_along_xyz - 1,
+            size=(steps, 3),
+        )
+        probability_of_spin_flip = random_number_generator.uniform(
+            low=0,
+            high=1,
+            size=steps,
+        )
+
+        return random_number_array, probability_of_spin_flip
 
     def _metropolis_algorithm_slow(
             self,
@@ -197,7 +250,8 @@ class Ising(object):
             steps,
             temperature,
             external_field,
-            algorithm="metropolis",
+            algorithm,
+            seed,
     ):
         """Run the main loop of the Markov-chain Monte Carlo simulation.
 
@@ -213,10 +267,14 @@ class Ising(object):
             External magnetic field in units of (check units)
 
         algorithm : str
-            Selects the algorithm to use for the simulation. Currently
-            implemented:
+            Sets algorithm to use for Monte Carlo simulation. Currently
+            available:
 
+            * "metropolis"
             * "slow_metropolis"
+
+        seed : int, array_like
+            Sets seed for random number generator
 
         Returns
         -------
@@ -224,6 +282,8 @@ class Ising(object):
             List of total system magnetization at each simulation time step
 
         """
+        random_number_generator = np.random.RandomState(seed=seed)
+
         magnetization_history = []
 
         if algorithm == "metropolis":
@@ -233,6 +293,7 @@ class Ising(object):
                 temperature=temperature,
                 external_field=external_field,
                 magnetization_history=magnetization_history,
+                random_number_generator=random_number_generator,
             )
 
         elif algorithm == "slow_metropolis":
@@ -258,7 +319,14 @@ class Ising(object):
 
         return magnetization_history
 
-    def _sweep_metropolis(self, external_field, temperature):
+    def _sweep_metropolis(
+            self,
+            external_field,
+            temperature,
+            random_number_array,
+            probability_of_spin_flip,
+            step_number,
+    ):
         """Single pass of Metropolis algorithm.
 
         Parameters
@@ -269,12 +337,11 @@ class Ising(object):
         temperature : float
             System temperature in units of (check units)
 
+        random_number_generator : np.random.RandomState object
+            Container for the Mersenne Twister pseudo-random number generator
+
         """
-        site_x, site_y, site_z = (
-            random.randint(0, self.number_sites_along_xyz - 1),
-            random.randint(0, self.number_sites_along_xyz - 1),
-            random.randint(0, self.number_sites_along_xyz - 1),
-        )
+        site_x, site_y, site_z = random_number_array[step_number]
         neighbors = [
             (site_x - 1, site_y, site_z),
             (site_x + 1, site_y, site_z),
@@ -285,17 +352,84 @@ class Ising(object):
         ]
 
         site_spin = self[site_x, site_y, site_z]
-        neighbor_spins = []
+        neighbor_spins = Counter()
         for neighbor_x, neighbor_y, neighbor_z in neighbors:
-            neighbor_spins.append(self[neighbor_x, neighbor_y, neighbor_z])
+            neighbor_spins["{0}".
+                           format(self[neighbor_x,
+                                       neighbor_y,
+                                       neighbor_z,
+                                       ])] += 1
 
-        change_in_total_energy = (
-            -2.0 * site_spin * (external_field + sum(neighbor_spins))
-        )
+        change_in_total_energy = self.delta_energy_lookup_table[
+            (site_spin, neighbor_spins["1"], neighbor_spins["-1"])
+        ]
+        # change_in_total_energy = (
+        #     -2.0 * site_spin * (external_field + neighbor_spins.sum())
+        # )
 
-        if change_in_total_energy > temperature * math.log(random.random()):
+        if change_in_total_energy > 0:
             self[site_x, site_y, site_z] = -self[site_x, site_y, site_z]
             self.magnetization += 2 * self[site_x, site_y, site_z]
+
+        elif probability_of_spin_flip[step_number
+                                      ] < self._find_boltzmann_probability(
+                                          site_spin, neighbor_spins["1"],
+                                          neighbor_spins["-1"]):
+            self[site_x, site_y, site_z] = -self[site_x, site_y, site_z]
+            self.magnetization += 2 * self[site_x, site_y, site_z]
+
+    def _generate_lookup_tables(
+            self,
+            external_field,
+            temperature,
+            number_of_neighbors,
+    ):
+
+        self.delta_energy_lookup_table = {}
+        self.boltzmann_lookup_table = {}
+        unique_neighbor_states = combinations_with_replacement(
+            (1, -1), number_of_neighbors
+        )
+
+        for neighbor_state in unique_neighbor_states:
+            neighbor_spins = Counter()
+            for neighbor in neighbor_state:
+                neighbor_spins["{0}".format(neighbor)] += 1
+
+            for site_spin in [1, -1]:
+                self.delta_energy_lookup_table[
+                    (site_spin, neighbor_spins["1"], neighbor_spins["-1"])
+                ] = (
+                    2.0 * site_spin * (
+                        external_field +
+                        (neighbor_spins["1"] - neighbor_spins["-1"])
+                    )
+                )
+
+        partition_normalization = 0
+        for (spin_states,
+             delta_energy) in self.delta_energy_lookup_table.items():
+            site_spin = spin_states[0]
+            neighbors_up = spin_states[1]
+            neighbors_down = spin_states[2]
+            boltzmann_probability = np.exp(-delta_energy / temperature)
+            self.boltzmann_lookup_table[
+                (site_spin, neighbors_up, neighbors_down)
+            ] = boltzmann_probability
+            partition_normalization += boltzmann_probability
+
+        for spin_states in self.boltzmann_lookup_table.keys():
+            self.boltzmann_lookup_table[spin_states] /= partition_normalization
+
+    def _find_boltzmann_probability(
+            self, site_spin, number_spin_up, number_spin_down
+    ):
+
+        boltzmann_probability = self.boltzmann_lookup_table[
+            (site_spin, number_spin_up, number_spin_down)
+        ]
+
+        return boltzmann_probability
 
     def _sweep_metropolis_slow(self, external_field, temperature):
         """Single pass of Metropolis (slow) algorithm.
@@ -380,6 +514,8 @@ def main(
         external_field_sweep_end=11,
         temperature_sweep_start=1,
         temperature_sweep_end=11,
+        algorithm="metropolis",
+        seed=None,
 ):
     """Run simulation over a sweep of temperature and external field values.
 
@@ -423,6 +559,8 @@ def main(
         temperature_sweep_start=temperature_sweep_start,
         temperature_sweep_end=temperature_sweep_end,
         simulation_results_database=simulation_results_database,
+        algorithm=algorithm,
+        seed=seed,
     )
 
     _save_database_to_disk(
@@ -440,6 +578,8 @@ def _external_field_and_temperature_sweep(
         temperature_sweep_start,
         temperature_sweep_end,
         simulation_results_database,
+        algorithm,
+        seed,
 ):
     number_temperature_sweeps = temperature_sweep_end - temperature_sweep_start
     for loop_index, external_field in enumerate(iterable=range(
@@ -453,6 +593,8 @@ def _external_field_and_temperature_sweep(
             simulation_results=simulation_results,
             sweep_start=temperature_sweep_start,
             sweep_end=temperature_sweep_end,
+            algorithm=algorithm,
+            seed=seed,
         )
 
         simulation_count_start = loop_index * number_temperature_sweeps
@@ -504,12 +646,16 @@ def _temperature_sweep(
         simulation_results,
         sweep_start,
         sweep_end,
+        algorithm,
+        seed,
 ):
     for temperature in range(sweep_start, sweep_end):
         simulation_statistics = ising.run_simulation(
             steps=steps,
             temperature=temperature,
             external_field=external_field,
+            algorithm=algorithm,
+            seed=seed,
         )
         simulation_results.append(simulation_statistics)
 
