@@ -36,14 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 class Ising(object):
-    """Monte Carlo simulation of the Ising model.
-
-    Parameters
-    ----------
-    n : int
-        Sets the number of sites in the square, three-dimensional Ising model.
-
-    """
+    """Monte Carlo simulation of the Ising model."""
 
     coords = []
 
@@ -106,16 +99,16 @@ class Ising(object):
 
         self.site_spin[index_x][index_y][index_z] = new_spin_value
 
-    def configuration(self, h, t):
-        """Temporary docstring.
+    def configuration(self, external_field, temperature):
+        """Save system state to output file.
 
         Parameters
         ----------
-        h : float
-            Magnetic field
+        external_field : float
+            External magnetic field in units of (check units)
 
-        t : float
-            Temperature
+        temperature : float
+            System temperature in units of (check units)
 
         """
         n = self.number_sites_along_xyz
@@ -129,16 +122,16 @@ class Ising(object):
         tname = "h={0}/configurations/t={1}.txt".format(str(h), str(t))
         np.savetxt(tname, config)
 
-    def step(self, t, h):
-        """Temporary docstring.
+    def step(self, external_field, temperature):
+        """Advance the Monte Carlo simulation by one time step.
 
         Parameters
         ----------
-        h : float
-            Magnetic field
+        external_field : float
+            External magnetic field in units of (check units)
 
-        t : float
-            Temperature
+        temperature : float
+            System temperature in units of (check units)
 
         """
         n = self.number_sites_along_xyz
