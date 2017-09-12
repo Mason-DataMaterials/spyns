@@ -48,6 +48,7 @@ class Heisenberg:
         sj_y = np.sum(self.sy[xn][yn][zn] for xn, yn, zn in neighbors )
         sj_z = np.sum(self.sz[xn][yn][zn] for xn, yn, zn in neighbors )
         
+        #check energy change with random theta/phi with phi/theta constant
         #update theta
         dE = -2.0*np.sum([self.sx[x][y][z]*(h+sj_x), self.sy[x][y][z]*(h+sj_y), self.sz[x][y][z]*(h+sj_z)])
         
@@ -85,8 +86,8 @@ def main():
             heisenberg.configuration(t=t,h=h)
             x= (t, mu, sigma)
             data.append(x)    
-            #fname = str(t)+".txt"    
-            #np.savetxt(fname, np.array(m))
+        
+        #save to file
         fname = "h="+str(h)+"/mg.txt"   
         np.savetxt(fname, data)       
      
