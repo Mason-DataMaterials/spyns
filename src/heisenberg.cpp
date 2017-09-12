@@ -1,10 +1,10 @@
 //
-//  main.cpp
+//  heisenberg.cpp
 //  Heisenberg-Model
 //
 //  Created by Swabir Silayi on 9/3/17.
-//  Copyright © 2017 Swabir Silayi. All rights reserved.
-//
+//  
+
 
 #include <iostream>
 #include <math.h>
