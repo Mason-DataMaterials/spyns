@@ -1,7 +1,7 @@
-//
+
 //  Heisenberg-Model
 //  heisenberg.cpp
-//
+
 
 #include <iostream>
 #include <math.h>
