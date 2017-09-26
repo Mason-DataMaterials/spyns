@@ -1,4 +1,4 @@
-//ising 2.0
+//ising 2.2
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
@@ -52,6 +52,8 @@ void initialize(int N, int *** si){
         }
     }
     
+    
+    
     return;
 }
 
@@ -78,7 +80,7 @@ int neighbors(int N, int *** si, int * point){
     int zm = (z+1) % N;
     
     int sj = si[xp][y][z] + si[xm][y][z] + si[x][yp][z] 
-                      + si[x][ym][z] + si[x][y][zp] + si[x][y][zm];
+    + si[x][ym][z] + si[x][y][zp] + si[x][y][zm];
     
     return sj;
 }
@@ -162,7 +164,7 @@ double deltaE (int N, int *** si, double h, double J, int * point)
  *           T - temperature 
  */ 
 void MC_move(int N, int *** si, double h, double J, 
-                            double &M, double &H, double T)
+             double &M, double &H, double T)
 {
     
     double beta = 1.0/T;
@@ -239,14 +241,125 @@ void configuration(int N, int *** si, string filename){
         
         return;
 }
+/* save_data(N, nT, data, h, J)
+ * saves calculated quantities to file
+ * 
+ * takes in: N - length of one side
+ *           si - 3D lattice of spin sites
+ *           nT - number of temperature steps
+ *           data - calculated values and averages
+ *           h - external manetic field
+ *           J - nearest neighbor coupling constant
+ */
+
+void save_data(int N, int nT, double ** data, double h, double J)
+{
+   
+    /*open file for writing*/
+    ofstream hfile;
+    std::ostringstream hf;
+    hf <<"h="<<h<<"_mvst.txt" ;
+    std::string hmf = hf.str();
+    hfile.open(hmf.c_str());
+    
+    hfile << "T\t<M>\tM_Var\t<M^2>\tM^2_Var\t" 
+    << "<E>\tE_Var\t<E^2>\tE^2_Var\t" 
+    << "X\tC_v\n" ;
+    
+    double N3 = (double)N*N*N;
+    
+    for (int i = 0; i < nT; i++)
+    {
+        double MAvg = data[i][0], HAvg=data[i][4], MVar= data[i][1], HVar = data[i][5];
+        double M2Avg = data[i][2], H2Avg=data[i][6], M2Var= data[i][3], H2Var=data[i][7];
+        
+        double T = data[i][8];
+        double beta = 1.0/T;
+        double beta2 = beta*beta;
+        
+        //Susceptibility
+        double X = beta*N3*( M2Avg - (MAvg*MAvg));
+        
+        //Specific Heat
+        double Cv = (beta2/N3)*(H2Avg - (HAvg*HAvg));
+        
+        //write to file
+        hfile << T << "\t"  
+        << MAvg << "\t" << MVar << "\t" << M2Avg << "\t" << M2Var << "\t" 
+        << HAvg << "\t" << HVar << "\t" << H2Avg << "\t" << H2Var << "\t" 
+        << X    << "\t" << Cv   << "\n" ;
+    }
+    
+    
+    hfile.close();
+    
+    return;
+}
+
+/* aucf(N, MAvg, si_hist, MCSteps, T)
+ * calculates spin time autocorrelation funtion and saves
+ * to file.
+ * takes in: N - length of one side
+ *           MAvg - Average value of M at temperature T
+ *           si_hist - list of M values at each simulation step 
+ *           MCSteps - number of MC simulation steps
+ *           T - temperature values
+ */
+void aucf(int N, double MAvg, double ** si_hist, int MCSteps, double T){
+    
+    int start = 0.0;
+    int stop = MCSteps;
+    int sample_rate = 10;
+    int scnt = 0;
+    
+    
+    ofstream acfile;
+    std::ostringstream acf;
+    acf <<"aucf"<<T<<".txt" ;
+    std::string aucf = acf.str();
+    acfile.open(aucf.c_str());
+    
+    int tmax = MCSteps;
+    double * chi = new double [tmax];
+    double chi_Avg, chi_Var;
+    
+    for (int t = 0; t < tmax; t++){
+        
+        double dT = 1./(double)(tmax - t);
+        
+        double term1 = 0.0;
+        double term2 = 0.0;
+        double term3 = 0.0;
+        
+        for (int tp = 0; tp < (tmax-t); tp++)
+        {
+            
+            term1 += dT * si_hist[tp][0]  * si_hist[tp+t][0] ;
+            term2 += dT * si_hist[tp][0];
+            term3 += dT * si_hist[tp+t][0];
+            
+        }
+        
+        chi[t] = term1 - (term2 * term3);
+        ave_var(t, chi_Avg, chi_Var, chi[t]);
+        
+        acfile << t << "\t" << chi[t] << "\t" << chi_Avg << "\t" << chi_Var << "\t" << term1-(MAvg*MAvg) << "\n";
+        
+    }
+    
+    acfile.close();
+    
+    return;
+}
+
 
 /*main program to calculate M,H values*/
 int main(){
     
-    int N = 10;                  //lattice dimension, lenght of single side
-    int MCSteps = 500*N*N*N;    //number of Monte Carlo moves
+    int N = 10;                 //lattice dimension, lenght of single side
+    int MCSteps = 100*N*N*N;    //number of Monte Carlo moves
     int eqSteps = 0.5*MCSteps;  //number of equilibration steps
-    
+    int sweep = N*N*N;          //number of steps for a complete lattice sweep
     
     double h = 1.0;             //external magnetic field
     double J = 2.0;             //coupling constant
@@ -255,6 +368,9 @@ int main(){
     //spin sites
     int *** si = new int ** [N];
     initialize(N, si);
+    
+    double ** si_hist = new double * [MCSteps+eqSteps];
+    for (int i = 0; i < eqSteps+MCSteps; i++) si_hist[i] = new double[3];
     
     //initial Energy and Magnetization
     double M = Magnetization(N, si);
@@ -265,70 +381,92 @@ int main(){
     double M2Avg, H2Avg, M2Var, H2Var;
     
     //reassurance
-    cout << "Running h = " << h << "\n";
+    cout << "Running for B = " << h << ", J =" << J << "\n" ;
     
-    /*open file for writing*/
-    ofstream tfile;
-    std::ostringstream tf;
-    tf <<"h="<<h<<"_mvst.txt" ;
-    std::string tmf = tf.str();
-    tfile.open(tmf.c_str());
-    tfile << "T  \t  <M>  \t  M_Var  \t  <M^2>  \t  M^2_Var \t" 
-    << "<E>  \t  E_Var  \t  <E^2>  \t  E^2_Var \t" 
-    << "X    \t  C_v   \n" ;
+    double Tmin = 1.0, Tmax = 20.0, Tstep = 1;
+    
+    int nT = (int) (Tmax-Tmin)/Tstep + 1;
+    
+    double ** data = new double * [ nT];
+    
+    for (int i =0; i < nT; i++) data[i] = new double [10];
+    
+    int dcnt = 0;
+    
     
     /*loop over T values*/
-    for (T=1.0; T <= 20.; T+=1){
+    for (T=Tmin; T <= Tmax; T+=Tstep){
         
+       
+        
+        for (int i = 0; i < (eqSteps+MCSteps); i++)
+        {   si_hist[i][0] = 0.0;
+            si_hist[i][1] = 0.0;
+            si_hist[i][2] = 0.0;
+        }
         
         //Equilibration steps (burn-in)
-        for (int step = 0; step < eqSteps; step++)
+        for (int step = 0; step < eqSteps; step++){
             MC_move(N, si, h, J, M, H, T);
+            
+            si_hist[step][0] = M; 
+            si_hist[step][1] = MAvg; 
+            si_hist[step][2] = M2Avg;
+            
+            
+        }
         
+        int eq = eqSteps;
         //Production steps
         for (int step = 0; step < MCSteps; step++){
             
             MC_move(N, si, h, J, M, H, T);
             
-            //running average and variance calculations 
-            ave_var(step, MAvg, MVar, M);
-            ave_var(step, HAvg, HVar, H);
-            ave_var(step, M2Avg, M2Var, M*M);
-            ave_var(step, H2Avg, H2Var, H*H);
+            
+            /*average after every complete lattice sweep - N*N*N steps */
+            
+            if (step % sweep == 0)
+            {
+                ave_var(step, MAvg, MVar, M);
+                ave_var(step, HAvg, HVar, H);
+                ave_var(step, M2Avg, M2Var, M*M);
+                ave_var(step, H2Avg, H2Var, H*H);
+            }
+            
+            
+            si_hist[step+eq][0] = M; 
+            si_hist[step+eq][1] = MAvg; 
+            si_hist[step+eq][2] = M2Avg;
             
             
         }//end loop over MCSteps
         
         
-        //Quantities
+        //accumulate data
+        data[dcnt][0] = MAvg; data[dcnt][1] = MVar; 
+        data[dcnt][2] = M2Avg; data[dcnt][3] = M2Var;
+        data[dcnt][4] = HAvg; data[dcnt][5] = HVar; 
+        data[dcnt][6] = H2Avg; data[dcnt][7] = H2Var;
+        data[dcnt][8] = T;
+        dcnt++;
         
-        double beta = 1.0/T;
-        double beta2 = beta*beta;
-        double N3 = (double)N*N*N;
         
-        //Susceptibility
-        double X = beta*N3*( M2Avg - (MAvg*MAvg));
-        
-        //Specific Heat
-        double Cv = (beta2/N3)*(H2Avg - (HAvg*HAvg));
-        
-        /*write to file*/
-        tfile << T << "\t"  
-        << MAvg << "\t" << MVar << "\t" << M2Avg << "\t" << M2Var << "\t" 
-        << HAvg << "\t" << HVar << "\t" << H2Avg << "\t" << H2Var << "\t" 
-        << X    << "\t" << Cv   << "\n" ;
+        //compute time correlation at each temperature T
+        aucf(N, MAvg, si_hist, MCSteps, T);
         
         //reassure      
-        cout << "Done h = " << h << ", T = " << T <<"\n";
+        cout << "... Done T = " << T <<"\n";
         
     }//end for loop over T
     
-    tfile.close();
-    
     //reassure
-    cout << "Done h = " << h << "\n";
+    cout << "saving data to file ... \n";
+    save_data(N, dcnt, data, h, J);
+    cout << "Done B = " << h << ", J =" << J << "\n" ;
     
-    free (si);
+    free (si); 
+    free (data);
+    free (si_hist);
     
     return 0;
     
