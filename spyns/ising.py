@@ -20,10 +20,10 @@ References
 
 """
 
-from pathlib import Path
 import logging
 import math
 import random
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -53,12 +53,9 @@ class Ising(object):
 
         """
         self.number_sites_along_xyz = number_sites_along_xyz
-        self.site_spin = [
-            [
-                [1 for x in range(number_sites_along_xyz)]
-                for y in range(number_sites_along_xyz)
-            ] for z in range(number_sites_along_xyz)
-        ]
+        self.site_spin = [[[1 for x in range(number_sites_along_xyz)]
+                           for y in range(number_sites_along_xyz)]
+                          for z in range(number_sites_along_xyz)]
         self.magnetization = number_sites_along_xyz**3
 
     def __getitem__(self, site_index):
@@ -126,29 +123,20 @@ class Ising(object):
             temperature.
 
         """
-        logger.info(
-            "Starting simulation run for t={0}, h={1}, steps={2}".
-            format(temperature, external_field, steps)
-        )
+        logger.info("Starting simulation run for t={0}, h={1}, steps={2}".
+                    format(temperature, external_field, steps))
 
         magnetization_history = self._monte_carlo_simulation(
-            steps=steps,
-            temperature=temperature,
-            external_field=external_field,
-        )
+            steps=steps, temperature=temperature,
+            external_field=external_field)
 
         mean_magnetization = np.mean(magnetization_history)
         std_dev_magnetization = np.std(magnetization_history)
-        simulation_statistics = (
-            temperature,
-            mean_magnetization,
-            std_dev_magnetization,
-        )
+        simulation_statistics = (temperature, mean_magnetization,
+                                 std_dev_magnetization)
 
-        self._write_state_snapshot_to_disk(
-            temperature=temperature,
-            external_field=external_field,
-        )
+        self._write_state_snapshot_to_disk(temperature=temperature,
+                                           external_field=external_field)
 
         return simulation_statistics
 
@@ -158,32 +146,19 @@ class Ising(object):
             for j in range(self.number_sites_along_xyz):
                 for k in range(self.number_sites_along_xyz):
                     state_single_site = np.array(
-                        [i, j, k, self.site_spin[i][j][k]]
-                    )
+                        [i, j, k, self.site_spin[i][j][k]])
                     state_full_system.append(state_single_site)
 
-    def _metropolis_algorithm_slow(
-            self,
-            steps,
-            temperature,
-            external_field,
-            magnetization_history,
-    ):
+    def _metropolis_algorithm_slow(self, steps, temperature, external_field,
+                                   magnetization_history):
 
         for _ in range(steps):
-            self._sweep_metropolis_slow(
-                temperature=float(temperature),
-                external_field=float(external_field),
-            )
+            self._sweep_metropolis_slow(temperature=float(temperature),
+                                        external_field=float(external_field))
             magnetization_history.append(self.magnetization)
 
-    def _monte_carlo_simulation(
-            self,
-            steps,
-            temperature,
-            external_field,
-            algorithm="slow_metropolis",
-    ):
+    def _monte_carlo_simulation(self, steps, temperature, external_field,
+                                algorithm="slow_metropolis"):
         """Run the main loop of the Markov-chain Monte Carlo simulation.
 
         Parameters
@@ -214,23 +189,18 @@ class Ising(object):
         if algorithm == "slow_metropolis":
             logger.info("Algorithm: Metropolis (slow implementation)")
             self._metropolis_algorithm_slow(
-                steps=steps,
-                temperature=temperature,
+                steps=steps, temperature=temperature,
                 external_field=external_field,
-                magnetization_history=magnetization_history,
-            )
+                magnetization_history=magnetization_history)
 
         else:
             logger.info(
                 "{0} is not a recognized algorithm. Running Metropolis "
-                "(slow implementation) by default.".format(algorithm)
-            )
+                "(slow implementation) by default.".format(algorithm))
             self._metropolis_algorithm_slow(
-                steps=steps,
-                temperature=temperature,
+                steps=steps, temperature=temperature,
                 external_field=external_field,
-                magnetization_history=magnetization_history,
-            )
+                magnetization_history=magnetization_history)
 
         return magnetization_history
 
@@ -246,28 +216,24 @@ class Ising(object):
             System temperature in units of (check units)
 
         """
-        site_x, site_y, site_z = (
-            random.randint(0, self.number_sites_along_xyz - 1),
-            random.randint(0, self.number_sites_along_xyz - 1),
-            random.randint(0, self.number_sites_along_xyz - 1),
-        )
-        neighbors = [
-            (site_x - 1, site_y, site_z),
-            (site_x + 1, site_y, site_z),
-            (site_x, site_y - 1, site_z),
-            (site_x, site_y - 1, site_z),
-            (site_x, site_y, site_z - 1),
-            (site_x, site_y, site_z + 1),
-        ]
+        site_x, site_y, site_z = (random.randint(
+            0, self.number_sites_along_xyz - 1), random.randint(
+                0, self.number_sites_along_xyz - 1), random.randint(
+                    0, self.number_sites_along_xyz - 1))
+        neighbors = [(site_x - 1, site_y,
+                      site_z), (site_x + 1, site_y,
+                                site_z), (site_x, site_y - 1, site_z),
+                     (site_x, site_y - 1,
+                      site_z), (site_x, site_y, site_z - 1), (site_x, site_y,
+                                                              site_z + 1)]
 
         site_spin = self[site_x, site_y, site_z]
         neighbor_spins = []
         for neighbor_x, neighbor_y, neighbor_z in neighbors:
             neighbor_spins.append(self[neighbor_x, neighbor_y, neighbor_z])
 
-        change_in_total_energy = (
-            -2.0 * site_spin * (external_field + sum(neighbor_spins))
-        )
+        change_in_total_energy = (-2.0 * site_spin *
+                                  (external_field + sum(neighbor_spins)))
 
         if change_in_total_energy > temperature * math.log(random.random()):
             self[site_x, site_y, site_z] = -self[site_x, site_y, site_z]
@@ -288,36 +254,26 @@ class Ising(object):
         output_directory = Path(".").cwd() / "results"
         output_directory.mkdir(parents=True, exist_ok=True)
         output_filename = (
-            output_directory / "final_states.csv".format(temperature)
-        )
+            output_directory / "final_states.csv".format(temperature))
 
         state_full_system = []
         column_names = ["site_x", "site_y", "site_z", "spin"]
         self._gather_current_state(state_full_system)
 
-        final_states_database = pd.DataFrame(
-            data=state_full_system,
-            columns=column_names,
-        )
+        final_states_database = pd.DataFrame(data=state_full_system,
+                                             columns=column_names)
         final_states_database["temperature"] = temperature
         final_states_database["external_field"] = external_field
 
-        _save_database_to_disk(
-            database=final_states_database,
-            output_filename=output_filename,
-            mode="append",
-            header=False if output_filename.exists() else True,
-        )
+        _save_database_to_disk(database=final_states_database,
+                               output_filename=output_filename, mode="append",
+                               header=False
+                               if output_filename.exists() else True)
 
 
-def main(
-        number_sites_along_xyz=10,
-        steps=25000,
-        external_field_sweep_start=1,
-        external_field_sweep_end=11,
-        temperature_sweep_start=1,
-        temperature_sweep_end=11,
-):
+def main(number_sites_along_xyz=10, steps=25000, external_field_sweep_start=1,
+         external_field_sweep_end=11, temperature_sweep_start=1,
+         temperature_sweep_end=11):
     """Run simulation over a sweep of temperature and external field values.
 
     Parameters
@@ -332,70 +288,49 @@ def main(
     """
     ising = Ising(number_sites_along_xyz=number_sites_along_xyz)
     column_names = [
-        "temperature",
-        "external_field",
-        "mean_magnetization",
-        "std_dev_magnetization",
+        "temperature", "external_field", "mean_magnetization",
+        "std_dev_magnetization"
     ]
     output_directory = Path(".").cwd() / "results"
     output_directory.mkdir(parents=True, exist_ok=True)
     output_filename = (
-        output_directory / "runs_magnetization_vs_temperature.csv"
-    )
-    number_simulations = (
-        (external_field_sweep_end - external_field_sweep_start) *
-        (temperature_sweep_end - temperature_sweep_start)
-    )
+        output_directory / "runs_magnetization_vs_temperature.csv")
+    number_simulations = ((
+        external_field_sweep_end - external_field_sweep_start) *
+                          (temperature_sweep_end - temperature_sweep_start))
     simulation_results_database = pd.DataFrame(
-        columns=column_names,
-        index=np.arange(number_simulations),
-    )
+        columns=column_names, index=np.arange(number_simulations))
 
     _external_field_and_temperature_sweep(
-        ising=ising,
-        steps=steps,
-        column_names=column_names,
+        ising=ising, steps=steps, column_names=column_names,
         external_field_sweep_start=external_field_sweep_start,
         external_field_sweep_end=external_field_sweep_end,
         temperature_sweep_start=temperature_sweep_start,
         temperature_sweep_end=temperature_sweep_end,
-        simulation_results_database=simulation_results_database,
-    )
+        simulation_results_database=simulation_results_database)
 
-    _save_database_to_disk(
-        database=simulation_results_database,
-        output_filename=output_filename,
-    )
+    _save_database_to_disk(database=simulation_results_database,
+                           output_filename=output_filename)
 
 
 def _external_field_and_temperature_sweep(
-        ising,
-        steps,
-        column_names,
-        external_field_sweep_start,
-        external_field_sweep_end,
-        temperature_sweep_start,
-        temperature_sweep_end,
-        simulation_results_database,
-):
+        ising, steps, column_names, external_field_sweep_start,
+        external_field_sweep_end, temperature_sweep_start,
+        temperature_sweep_end, simulation_results_database):
     number_temperature_sweeps = temperature_sweep_end - temperature_sweep_start
     for loop_index, external_field in enumerate(iterable=range(
             external_field_sweep_start, external_field_sweep_end), start=0):
         simulation_results = []
 
-        _temperature_sweep(
-            ising=ising,
-            steps=steps,
-            external_field=external_field,
-            simulation_results=simulation_results,
-            sweep_start=temperature_sweep_start,
-            sweep_end=temperature_sweep_end,
-        )
+        _temperature_sweep(ising=ising, steps=steps,
+                           external_field=external_field,
+                           simulation_results=simulation_results,
+                           sweep_start=temperature_sweep_start,
+                           sweep_end=temperature_sweep_end)
 
         simulation_count_start = loop_index * number_temperature_sweeps
         simulation_count_end = (
-            simulation_count_start + number_temperature_sweeps - 1
-        )
+            simulation_count_start + number_temperature_sweeps - 1)
 
         # yapf: disable
         simulation_results_database.loc[
@@ -409,45 +344,25 @@ def _external_field_and_temperature_sweep(
         # yapf: enable
 
 
-def _save_database_to_disk(
-        database,
-        output_filename,
-        mode="write",
-        header=True,
-):
+def _save_database_to_disk(database, output_filename, mode="write",
+                           header=True):
 
     if mode == "write":
-        database.to_csv(
-            path_or_buf="{0}.gz".format(output_filename),
-            index=False,
-            mode="w",
-            header=header,
-            compression="gzip",
-        )
+        database.to_csv(path_or_buf="{0}.gz".format(output_filename),
+                        index=False, mode="w", header=header,
+                        compression="gzip")
     elif mode == "append":
-        database.to_csv(
-            path_or_buf="{0}.gz".format(output_filename),
-            index=False,
-            mode="a",
-            header=header,
-            compression="gzip",
-        )
+        database.to_csv(path_or_buf="{0}.gz".format(output_filename),
+                        index=False, mode="a", header=header,
+                        compression="gzip")
 
 
-def _temperature_sweep(
-        ising,
-        steps,
-        external_field,
-        simulation_results,
-        sweep_start,
-        sweep_end,
-):
+def _temperature_sweep(ising, steps, external_field, simulation_results,
+                       sweep_start, sweep_end):
     for temperature in range(sweep_start, sweep_end):
         simulation_statistics = ising.run_simulation(
-            steps=steps,
-            temperature=temperature,
-            external_field=external_field,
-        )
+            steps=steps, temperature=temperature,
+            external_field=external_field)
         simulation_results.append(simulation_statistics)
 
 
@@ -456,7 +371,4 @@ if __name__ == '__main__':
     number_sites_along_xyz = 10
     steps = 25000
 
-    main(
-        number_sites_along_xyz=number_sites_along_xyz,
-        steps=steps,
-    )
+    main(number_sites_along_xyz=number_sites_along_xyz, steps=steps)
