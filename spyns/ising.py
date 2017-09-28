@@ -123,8 +123,8 @@ class Ising(object):
             temperature.
 
         """
-        logger.info("Starting simulation run for t={0}, h={1}, steps={2}".
-                    format(temperature, external_field, steps))
+        logger.info("Starting simulation run for t=%s, h=%s, steps=%s",
+                    temperature, external_field, steps)
 
         magnetization_history = self._monte_carlo_simulation(
             steps=steps, temperature=temperature,
@@ -194,9 +194,8 @@ class Ising(object):
                 magnetization_history=magnetization_history)
 
         else:
-            logger.info(
-                "{0} is not a recognized algorithm. Running Metropolis "
-                "(slow implementation) by default.".format(algorithm))
+            logger.info("%s is not a recognized algorithm. Running Metropolis "
+                        "(slow implementation) by default.", algorithm)
             self._metropolis_algorithm_slow(
                 steps=steps, temperature=temperature,
                 external_field=external_field,
@@ -369,7 +368,4 @@ def _temperature_sweep(ising, steps, external_field, simulation_results,
 
 if __name__ == '__main__':
 
-    number_sites_along_xyz = 10
-    steps = 25000
-
-    main(number_sites_along_xyz=number_sites_along_xyz, steps=steps)
+    main(number_sites_along_xyz=10, steps=25000)
