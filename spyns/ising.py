@@ -216,16 +216,18 @@ class Ising(object):
             System temperature in units of (check units)
 
         """
-        site_x, site_y, site_z = (random.randint(
-            0, self.number_sites_along_xyz - 1), random.randint(
-                0, self.number_sites_along_xyz - 1), random.randint(
-                    0, self.number_sites_along_xyz - 1))
-        neighbors = [(site_x - 1, site_y,
-                      site_z), (site_x + 1, site_y,
-                                site_z), (site_x, site_y - 1, site_z),
-                     (site_x, site_y - 1,
-                      site_z), (site_x, site_y, site_z - 1), (site_x, site_y,
-                                                              site_z + 1)]
+        site_x, site_y, site_z = (
+            random.randint(0, self.number_sites_along_xyz - 1),
+            random.randint(0, self.number_sites_along_xyz - 1),
+            random.randint(0, self.number_sites_along_xyz - 1), )
+        neighbors = [
+            (site_x - 1, site_y, site_z),
+            (site_x + 1, site_y, site_z),
+            (site_x, site_y - 1, site_z),
+            (site_x, site_y - 1, site_z),
+            (site_x, site_y, site_z - 1),
+            (site_x, site_y, site_z + 1),
+        ]
 
         site_spin = self[site_x, site_y, site_z]
         neighbor_spins = []
@@ -253,8 +255,7 @@ class Ising(object):
         """
         output_directory = Path(".").cwd() / "results"
         output_directory.mkdir(parents=True, exist_ok=True)
-        output_filename = (
-            output_directory / "final_states.csv".format(temperature))
+        output_filename = output_directory / "final_states.csv"
 
         state_full_system = []
         column_names = ["site_x", "site_y", "site_z", "spin"]
