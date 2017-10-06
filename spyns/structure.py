@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Hamiltonian constructor for the Ising model.
+"""Wrapper for pymatgen Structure objects.
 
 Copyright (c) Mason DataMaterials Group.
 Distributed under the terms of the MIT License.
@@ -17,20 +17,17 @@ __date__ = "October 6, 2017"
 logger = logging.getLogger(__name__)
 
 
-class Hamiltonian(object):
-    """Pair-wise interactions between Ising spins."""
+class SpynsStructure(object):
+    """Crystal structure defining a material system."""
 
     def __init__(self):
-        """Build Hamiltonian object using site and neighbor information.
+        """Build SpynsStructure directly from a pymatgen Structure object.
 
         Parameters
         ----------
-        sites : list
-            Positions of `n` sites indexed from 0 to `n` - 1
-
-        neighbors : dict
-            Each site's neighbors grouped and sorted by distance and identified
-            by site index
+        structure : `pymatgen.core.structure.Structure` instance
+            Encodes the structural information of a material via pymatgen's
+            Structure class.
 
         """
         pass
