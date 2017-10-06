@@ -1,4 +1,4 @@
-//ising 2.2
+//ising 2.3
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
@@ -57,7 +57,7 @@ void initialize(int N, int *** si){
  *           point - site of interest
  * returns: sj - sum of the spins of neighbors of point
  */
-int neighbors2(int N, int *** si, int * point){
+void neighbors(int N, int *** si, int * point, int * sj){
     
     int x = point[0];
     int y = point[1];
@@ -70,36 +70,14 @@ int neighbors2(int N, int *** si, int * point){
     int zp = (z+N-1) % N;
     int zm = (z+1) % N;
     
-    int sj = si[xp][y][zp] + si[x][yp][zp] + si[xm][y][zp] + si[x][ym][zp] + si[xp][y][zm] + si[x][yp][zm] + si[xm][y][zm]+ + si[x][ym][zm];
+    int sj1 = si[xp][y][z] + si[xm][y][z] + si[x][yp][z] + si[x][ym][z] + si[x][y][zp] + si[x][y][zm];
+    int sj2 = si[xp][y][zp] + si[x][yp][zp] + si[xm][y][zp] + si[x][ym][zp]
+    + si[xp][y][zm] + si[x][yp][zm] + si[xm][y][zm]+ + si[x][ym][zm];
     
-    return sj;
-}
-
-/* neighbors(N, si, point)
- * calculates the sum of spins for the
- * 6 neighboring sites of a point in the
- * grid.
- * takes in: N - length of one side
- *           si - 3D lattice of spin sites
- *           point - site of interest
- * returns: sj - sum of the spins of neighbors of point
- */
-int neighbors(int N, int *** si, int * point){
+    sj[0] = sj1;
+    sj[1] = sj2;
     
-    int x = point[0];
-    int y = point[1];
-    int z = point[2];
-    
-    int xp = (x+N-1) % N;
-    int xm = (x+1) % N;
-    int yp = (y+N-1) % N;
-    int ym = (y+1) % N;
-    int zp = (z+N-1) % N;
-    int zm = (z+1) % N;
-    
-    int sj = si[xp][y][z] + si[xm][y][z] + si[x][yp][z] + si[x][ym][z] + si[x][y][zp] + si[x][y][zm];
-    
-    return sj;
+    return;
 }
 
 /* Magnetization(N, si)
@@ -130,23 +108,26 @@ double Magnetization(int N, int *** si){
  *           J - nearest neighbor coupling constant
  * returns: H - total energy of grid
  */
-double Energy( int N, int *** si, double h, double J){
+double Energy( int N, int *** si, double h, double * J){
     
     double H = 0.0;
     int * point = new int [3];
+    int * sj = new int [2];
+    sj[0] = sj[1] = 0;
     
     for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++)
             for (int k = 0; k < N; k++){
                 point[0] = i; point[1] = j; point[2]=k;
                 
-                int sj = neighbors(N, si, point);
-                H = H + ( -(J*si[i][j][k]*sj) - h*si[i][j][k] );
+                neighbors(N, si, point, sj);
+                H = H + ( -(si[i][j][k]*(J[0]*sj[0] + J[1]*sj[1])) - h*si[i][j][k] );
             }
             
             free (point);
-        
-        return H / 2.0;
+        free (sj);
+    
+    return H / 2.0;
 }
 
 /* deltaE(N, si, h, J, point)
@@ -158,15 +139,21 @@ double Energy( int N, int *** si, double h, double J){
  *           point - site of interest
  * returns: dE - change in energy from flipping point
  */
-double deltaE (int N, int *** si, double h, double J, int * point)
+double deltaE (int N, int *** si, double h, double * J, int * point)
 {
+    int * sj = new int [2];
+    sj[0] = sj[1] = 0;
     
-    int sj = neighbors(N, si , point);
-    double dE = -2.0 * ( (J*si[point[0]][point[1]][point[2]]*sj)
+    neighbors(N, si , point, sj);
+    double dE = 2.0 * ( (si[point[0]][point[1]][point[2]]*(J[0]*sj[0] +J[1]*sj[1]))
     + (h*si[point[0]][point[1]][point[2]]) );
+    
+    
+    free(sj);
     
     return dE;
 }
+
 
 /* MC_move(N, si, h, J, M, H, T)
  * single step Monte Carlo move to determine
@@ -180,7 +167,7 @@ double deltaE (int N, int *** si, double h, double J, int * point)
  *           H - total energy
  *           T - temperature
  */
-void MC_move(int N, int *** si, double h, double J,
+void MC_move(int N, int *** si, double h, double * J,
              double &M, double &H, double T)
 {
     
@@ -197,11 +184,17 @@ void MC_move(int N, int *** si, double h, double J,
     double dE = deltaE(N, si, h, J, point);
     double dm = 0.0, dh = 0.0;
     
-    double p = T*log(dist(engine));
+    double p = dist(engine);
     
-    if (dE > p)
+    if (dE < 0.0)
     {
         
+        si[i][j][k] *= -1;
+        dm = 2.0*si[i][j][k];
+        dh = -0.5*dE;
+    }
+    else if (p < exp(-dE*beta))
+    {
         si[i][j][k] *= -1;
         dm = 2.0*si[i][j][k];
         dh = -0.5*dE;
@@ -213,7 +206,6 @@ void MC_move(int N, int *** si, double h, double J,
     free (point);
     return;
 }
-
 
 /* ave_var(cc, Avg, Var, U)
  * calculates and upates the instantaneous average (Avg)
@@ -269,7 +261,7 @@ void configuration(int N, int *** si, string filename){
  *           J - nearest neighbor coupling constant
  */
 
-void save_data(int N, double * data, double h, double J)
+void save_data(int N, double * data)
 {
     
     double T = data[8];
@@ -277,13 +269,13 @@ void save_data(int N, double * data, double h, double J)
     /*open file for writing*/
     ofstream hfile;
     std::ostringstream hf;
-    hf <<T<<".txt" ;
+    hf <<"data_"<<N<<".txt" ;
     std::string hmf = hf.str();
-    hfile.open(hmf.c_str());
+    hfile.open(hmf.c_str(), ios_base::app);
     
-    hfile << "T\t<M>\tM_Var\t<M^2>\tM^2_Var\t"
-    << "<E>\tE_Var\t<E^2>\tE^2_Var\t"
-    << "X\tC_v\n" ;
+    //hfile << "T\t<M>\tM_Var\t<M^2>\tM^2_Var\t"
+    //<< "<E>\tE_Var\t<E^2>\tE^2_Var\t"
+    //<< "X\tC_v\n" ;
     
     double N3 = (double)N*N*N;
     
@@ -370,49 +362,24 @@ void aucf(int N, double MAvg, double ** si_hist, int MCSteps, double T){
     return;
 }
 
-
 int main(int argc, char *argv[]){
     
-    int N = 10;                 //lattice dimension, lenght of single side
+    int N = 15;                 //lattice dimension, lenght of single side
     double h = 1.0;             //external magnetic field
-    double J = 2.0;             //coupling constant
+    
+    double * J = new double [2];
+    J[0] =1.0; J[1] = 0.5;              //coupling constant
     
     double T;                   //temperature value
     
-    if ( argc != 5 ) {
-        cout<<"usage: "<< argv[0] <<" N T h J \n";
-        return 0;  
-    }
-    else { 
-        N = (int) atof(argv[1]);
-        T = atof(argv[2]);
-        h = atof(argv[3]);
-        J = atof(argv[4]);
-        
-    }
     
-    
-    
-    int MCSteps = 1000*N*N*N;    //number of Monte Carlo moves
-    int eqSteps = 0.5*MCSteps;  //number of equilibration steps
+    int MCSteps = 1500*N*N*N;    //number of Monte Carlo moves
+    int eqSteps = 0.3*MCSteps;  //number of equilibration steps
     int sweep = N*N*N;          //number of steps for a complete lattice sweep
     
-    
- /*   
-    cout << "Ising Model MC Simulation \n";
-    cout << "PARAMETERS: N = " << N << "\n";
-    cout << "            T = " <<fixed << T << "\n";
-    cout << "            B = " <<fixed << h << "\n";
-    cout << "            J = " <<fixed << J << "\n";
-    cout << "No. of MC Steps = " << MCSteps <<"\n\n"; 
-    
-    cout << "Initializing ... \n"; 
-*/
     //spin sites
     int *** si = new int ** [N];
     initialize(N, si);
-    
-    int nt = omp_get_max_threads();
     
     double ** si_hist = new double * [MCSteps+eqSteps];
     for (int i = 0; i < eqSteps+MCSteps; i++) si_hist[i] = new double[3];
@@ -422,57 +389,6 @@ int main(int argc, char *argv[]){
         si_hist[i][2] = 0.0;
     }
     
-    uniform_int_distribution<int> nsites_gen(0, N - 1);
-    
-    int i = nsites_gen(engine);
-    int j = nsites_gen(engine);
-    int k = nsites_gen(engine);
-    
-    int * point = new int [3];
-    point[0] = 1; point[1] = 2; point[2]=3;
-    
-    int x = point[0];
-    int y = point[1];
-    int z = point[2];
-    
-    int xp = (x+N-1) % N;
-    int xm = (x+1) % N;
-    int yp = (y+N-1) % N;
-    int ym = (y+1) % N;
-    int zp = (z+N-1) % N;
-    int zm = (z+1) % N;
-    
-    cout << x << "\t" << y << "\t" << z << "\t" << 0 << "\n";
-    cout << xp << "\t" << y << "\t" << z << "\t" << 1 << "\n";
-    cout << xm << "\t" << y << "\t" << z << "\t" << 1 << "\n";
-    cout << x << "\t" << yp << "\t" << z << "\t" << 1 << "\n";
-    cout << x << "\t" << ym << "\t" << z << "\t" << 1 << "\n";
-    cout << x << "\t" << y << "\t" << zp << "\t" << 1 << "\n";
-    cout << x << "\t" << y << "\t" << zm << "\t" << 1 << "\n";
-    
-    cout << xp << "\t" << y << "\t" << zp << "\t" << 2 << "\n";
-    cout << x << "\t" << yp << "\t" << zp << "\t" << 2 << "\n";
-    cout << xm << "\t" << y << "\t" << zp << "\t" << 2 << "\n";
-    cout << x << "\t" << ym << "\t" << zp << "\t" << 2 << "\n";
-    cout << xp << "\t" << y << "\t" << zm << "\t" << 2 << "\n";
-    cout << x << "\t" << yp << "\t" << zm << "\t" << 2 << "\n";
-    cout << xm << "\t" << y << "\t" << zm << "\t" << 2 << "\n";
-    cout << x << "\t" << ym << "\t" << zm << "\t" << 2 << "\n";
-  /*  
-    int sj = si[xp][y][z] + si[xm][y][z] + si[x][yp][z] + si[x][ym][z] + si[x][y][zp] + si[x][y][zm];
-    
-     int sj = 
-     si[xp][y][zp] + 
-     si[x][yp][zp] + 
-     si[xm][y][zp] + 
-     si[x][ym][zp] + 
-     si[xp][y][zm] + 
-     si[x][yp][zm] + 
-     si[xm][y][zm] + 
-     si[x][ym][zm];
-    
-  */  
- /*   
     double * data = new double  [10];
     for (int i =0; i < 10; i++) data[i] = 0.0;
     
@@ -484,66 +400,69 @@ int main(int argc, char *argv[]){
     double MAvg, HAvg, MVar, HVar;
     double M2Avg, H2Avg, M2Var, H2Var;
     
-    cout << "Initial M = " << M << "\n"; 
-    cout << "Initial H = " << H << "\n"; 
     
-    cout << "\nBurn In ... \t";
-    //Equilibration steps (burn-in)
-    for (int step = 0; step < eqSteps; step++)
+    //loop over T values
+    for (T =1; T <= 25; T++)
     {
-        MC_move(N, si, h, J, M, H, T);
-        cout << step << "\t" << M << "\n";
-    }
- /*   
-    cout << "\nProdcution ... \n";
-    //Production steps
-    for (int step = 0; step < MCSteps; step++){
-        
-        MC_move(N, si, h, J, M, H, T);
+        //Equilibration steps (burn-in)
+        for (int step = 0; step < eqSteps; step++)
+            MC_move(N, si, h, J, M, H, T);
         
         
-        /*average after every complete lattice sweep - N*N*N steps */
-/*        
-        if (step % sweep == 0)
+        
+        //Production steps
+        for (int step = 0; step < MCSteps; step++)
         {
-           ave_var(step, MAvg, MVar, M);
-            ave_var(step, HAvg, HVar, H);
-            ave_var(step, M2Avg, M2Var, M*M);
-/*            ave_var(step, H2Avg, H2Var, H*H);
-        }
+            
+            MC_move(N, si, h, J, M, H, T);
+            
+            
+            /*average after every complete lattice sweep - N*N*N steps */
+            
+            if (step % sweep == 0)
+            {
+                ave_var(step, MAvg, MVar, M);
+                ave_var(step, HAvg, HVar, H);
+                ave_var(step, M2Avg, M2Var, M*M);
+                ave_var(step, H2Avg, H2Var, H*H);
+            }
+            
+            
+            si_hist[step][0] = M;
+            si_hist[step][1] = MAvg;
+            si_hist[step][2] = M2Avg;
+            
+            
+        }//end loop over MCSteps
+        
+        //accumulate data
+        data[0] = MAvg; data[1] = MVar;
+        data[2] = M2Avg; data[3] = M2Var;
+        data[4] = HAvg; data[5] = HVar;
+        data[6] = H2Avg; data[7] = H2Var;
+        data[8] = T;
+        
+        //compute time correlation at each temperature T
+        //aucf(N, MAvg, si_hist, MCSteps, T);
+        
+        cout << "saving to file ... \n";
+        save_data(N, data);
+        
+        cout << "Done for T = " << T << " with " ;
+        cout << "Final M = " << M << " , "; 
+        cout << "Final H = " << H << "\n";    
         
         
-        si_hist[step][0] = M;
-        si_hist[step][1] = MAvg;
-        si_hist[step][2] = M2Avg;
         
-        
-    }//end loop over MCSteps
+    }//end loop over T
     
- /*   
-    //accumulate data
-    data[0] = MAvg; data[1] = MVar;
-    data[2] = M2Avg; data[3] = M2Var;
-    data[4] = HAvg; data[5] = HVar;
-    data[6] = H2Avg; data[7] = H2Var;
-    data[8] = T;
     
-    //compute time correlation at each temperature T
-//    aucf(N, MAvg, si_hist, MCSteps, T);
     
-    cout << "saving to file ... \n";
-    save_data(N, data, h, J);
     
-    cout << "Done for T = " << T << "\n" ;
-    cout << "Final M = " << M << "\n"; 
-    cout << "Final H = " << H << "\n"; 
-    
-
-    free (si);
-    free (data);
-    free (si_hist);
-*/
- 
-    return 0;
-
+    return 0; 
 }
+
+
+
+
+
