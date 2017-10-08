@@ -1,5 +1,5 @@
 # -*- coding : utf - 8 -*-
-"""Wrapper for pymatgen Structure objects.
+"""Data structures for Spyns simulations.
 
 Copyright (c) Mason DataMaterials Group.
 Distributed under the terms of the MIT License.
@@ -138,4 +138,12 @@ class SpynsSystem(MSONable):
             An instance of the SpynsStructure class
 
         """
+        pass
+
+
+class SimulationData(MSONable):
+    """Placeholder."""
+
+    def __init__(self):
+        """Placeholder."""
         pass
