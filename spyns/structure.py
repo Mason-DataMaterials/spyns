@@ -1,4 +1,4 @@
-#- * - coding : utf - 8 - * -
+# -*- coding : utf - 8 -*-
 """Wrapper for pymatgen Structure objects.
 
 Copyright (c) Mason DataMaterials Group.
@@ -8,11 +8,10 @@ Distributed under the terms of the MIT License.
 
 import logging
 
-import ruamel.yaml
-from ruamel.yaml.scanner import ScannerError
-
 import pymatgen as pmg
+import ruamel.yaml
 from monty.json import MSONable
+from ruamel.yaml.scanner import ScannerError
 
 __author__ = "James Glasbrenner"
 __copyright__ = "Copyright 2017, Mason DataMaterials Group"
@@ -23,7 +22,7 @@ __date__ = "October 6, 2017"
 logger = logging.getLogger(__name__)
 
 
-class SpynsStructure(MSONable):
+class SpynsSystem(MSONable):
     """Crystal structure defining a material system."""
 
     def __init__(self):
