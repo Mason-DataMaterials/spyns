@@ -21,6 +21,10 @@ loggers:
     level: DEBUG
     handlers: [debug_file_handler]
     propagate: false
+  tests:
+    level: DEBUG
+    handlers: [debug_file_handler]
+    propagate: false
 root:
   level: NOTSET
   handlers: [console]
