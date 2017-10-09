@@ -15,7 +15,7 @@ import ruamel.yaml
 from monty.json import MSONable
 from ruamel.yaml.scanner import ScannerError
 
-from spyns.pmg import build_structure
+from spyns.pmg import build_structure, find_all_neighbors
 
 __author__ = "James Glasbrenner"
 __copyright__ = "Copyright 2017, Mason DataMaterials Group"
@@ -40,6 +40,7 @@ class SpynsSystem(MSONable):
 
         """
         self._neighbors = None
+        self._neighbor_distances = None
         self._spins = None
         self._sublattices = None
 
@@ -210,8 +211,10 @@ class SpynsSystem(MSONable):
     @neighbors.setter
     def neighbors(self, cutoff):
         """Placeholder."""
-        pmg_neighbors = self.pmg_structure.get_all_neighbors(r=cutoff)
-        self._neighbors = pmg_neighbors
+        all_neighbors, neighbor_distances = find_all_neighbors(
+            pmg_structure=self.pmg_structure, cutoff=cutoff)
+        self._neighbors = all_neighbors
+        self._neighbor_distances = neighbor_distances
 
     @property
     def sublattices(self):
