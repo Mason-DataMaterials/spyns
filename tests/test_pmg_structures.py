@@ -65,7 +65,6 @@ def pmg_iron_structure():
 
 def test_pmg_structure_load(pmg_iron_structure):
     """Test loading for pymatgen structure."""
-
     logger.debug("BEGIN UNITTEST: Load a pymatgen structure with a YAML-like "
                  "specification")
     spyns_system = SpynsSystem.from_yaml(pmg_iron_structure)
@@ -77,7 +76,6 @@ def test_pmg_structure_load(pmg_iron_structure):
 
 def test_pmg_neighbor_find_sort(pmg_iron_structure):
     """Test finding and sorting neighbors of pymatgen structure."""
-
     logger.debug("BEGIN UNITTEST: Find and sort neighbors of a pymatgen "
                  "structure.")
     spyns_system = SpynsSystem.from_yaml(pmg_iron_structure)
