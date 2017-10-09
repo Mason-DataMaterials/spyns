@@ -70,7 +70,7 @@ def convert_spherical_to_cartesian(rho, phi, theta):
 
 
 def groupby_list(*args, **kwargs):
-    """Wrapper for itertools.groupby that replaces generators with lists.
+    """Provide wrapper for itertools.groupby replacing generators with lists.
 
     Returns
     -------
@@ -89,5 +89,4 @@ def groupby_list(*args, **kwargs):
        https://stackoverflow.com/q/20013133
 
     """
-
     return [(k, list(g)) for k, g in groupby(*args, **kwargs)]
