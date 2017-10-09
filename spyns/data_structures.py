@@ -43,6 +43,10 @@ class SpynsSystem(MSONable):
             Structure class.
 
         """
+        self._neighbors = None
+        self._spins = None
+        self._sublattices = None
+
         if pmg_structure and isinstance(pmg_structure, Structure):
             logger.debug("Input structure appears to be a pymatgen.Structure "
                          "object.")
@@ -401,22 +405,36 @@ class SpynsSystem(MSONable):
 
         return working_structure
 
-    def as_dict(self):
-        """Convert SpynsSystem into a serialized JSON-style dict."""
-        dict_spyns_system = {"spyns_system": self.pmg_structure.as_dict()}
+    @property
+    def spins(self):
+        """Placeholder."""
+        return self._spins
 
-        # MSONable boilerplate
-        dict_spyns_system["@module"] = self.__class__.__module__
-        dict_spyns_system["@class"] = self.__class__.__name__
+    @spins.setter
+    def spins(self, value):
+        """Placeholder."""
+        pass
 
-        return dict_spyns_system
+    @property
+    def neighbors(self):
+        """Placeholder."""
+        return self._neighbors
 
-    @classmethod
-    def from_dict(cls, dict_spyns_system):
-        """Regenerate SpynsSystem using serialized JSON-style dict."""
-        spyns_system = dict_spyns_system.get("spyns_system")
+    @neighbors.setter
+    def neighbors(self, cutoff):
+        """Placeholder."""
+        pmg_neighbors = self.pmg_structure.get_all_neighbors(r=cutoff)
+        self._neighbors = pmg_neighbors
 
-        return cls(pmg_structure=pmg.Structure.from_dict(spyns_system))
+    @property
+    def sublattices(self):
+        """Placeholder."""
+        return self._sublattices
+
+    @sublattices.setter
+    def sublattices(self, value):
+        """Placeholder."""
+        pass
 
 
 class SimulationData(MSONable):
