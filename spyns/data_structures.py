@@ -30,10 +30,10 @@ logger = logging.getLogger(__name__)
 
 
 class SpynsSystem(MSONable):
-    """Crystal structure defining a material system."""
+    """Crystal structure and parameters defining a material system."""
 
     def __init__(self, pmg_structure):
-        """Build SpynsStructure directly from a pymatgen Structure object.
+        """Build SpynsSystem directly from a pymatgen Structure object.
 
         Parameters
         ----------
@@ -74,7 +74,7 @@ class SpynsSystem(MSONable):
 
     @classmethod
     def from_yaml(cls, filename: str):
-        """Create SpynsStructure by reading parameters from a YAML file.
+        """Create SpynsSystem by reading parameters from a YAML file.
 
         The YAML file defines a crystal structure by pointing to a VASP POSCAR
         file or CIF file, or by providing spacegroup information. If using
@@ -169,7 +169,7 @@ class SpynsSystem(MSONable):
         Returns
         -------
         cls
-            An instance of the SpynsStructure class
+            An instance of the SpynsSystem class
 
         """
         try:
