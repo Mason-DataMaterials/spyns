@@ -8,14 +8,16 @@ Distributed under the terms of the MIT License.
 
 import copy
 import logging
+import math
 import operator
 import sys
+from itertools import groupby
 
 from pymatgen import Lattice, Structure
 from pymatgen.transformations.standard_transformations import \
     SupercellTransformation
 
-from spyns.utils import convert_spherical_to_cartesian
+from spyns.utils import convert_spherical_to_cartesian, groupby_list
 
 __author__ = "James Glasbrenner"
 __copyright__ = "Copyright 2017, Mason DataMaterials Group"
@@ -236,3 +238,89 @@ def sort_spin_sites(pmg_structure):
     return sorted_pmg_structure
 
 
+def find_all_neighbors(pmg_structure, cutoff):
+    """Placeholder."""
+    all_neighbors = pmg_structure.get_all_neighbors(r=cutoff,
+                                                    include_index=True)
+    grouped_neighbors = group_all_neighbors(pmg_structure, all_neighbors)
+
+    return grouped_neighbors
+
+
+def group_all_neighbors(pmg_structure, all_neighbors):
+    """Placeholder."""
+    sublattices_set = set(pmg_structure.site_properties["sublattice"])
+    unique_sublattice_distances = {}
+    for sublattice_id in sublattices_set:
+        unique_sublattice_distances["{0}".format(sublattice_id)] = {
+            "{0}".format(x): []
+            for x in sublattices_set
+        }
+    logger.debug("Pre-allocated dict for sublattice distances = %s",
+                 unique_sublattice_distances)
+
+    sorted_all_neighbors = []
+
+    for site_index, site_neighbors in enumerate(all_neighbors):
+        site_sublattice_id = pmg_structure[site_index].properties["sublattice"]
+        unique_site_distances = unique_sublattice_distances["{0}".format(
+            site_sublattice_id)]
+
+        for neighbor in site_neighbors:
+            neighbor_sublattice_id = neighbor[0].properties["sublattice"]
+            neighbor_distance = neighbor[1]
+            unique_neighbor_distances = unique_site_distances["{0}".format(
+                neighbor_sublattice_id)]
+            new_distance_test = [
+                math.isclose(neighbor_distance, x)
+                for x in unique_neighbor_distances
+            ]
+            if not any(new_distance_test):
+                unique_neighbor_distances.append(neighbor_distance)
+
+    # Sort unique distances between sublattice-sublattice pairs
+    for sublattice_pairs in unique_sublattice_distances.values():
+        for unique_distances in sublattice_pairs.values():
+            unique_distances.sort()
+
+    all_neighbors_sorted = []
+    for site_index, site_neighbors in enumerate(all_neighbors):
+        site_sublattice_id = pmg_structure[site_index].properties["sublattice"]
+        unique_site_distances = unique_sublattice_distances["{0}".format(
+            site_sublattice_id)]
+
+        site_neighbors_numbered = []
+        for neighbor in site_neighbors:
+            neighbor_sublattice_id = neighbor[0].properties["sublattice"]
+            neighbor_distance = neighbor[1]
+            unique_neighbor_distances = unique_site_distances["{0}".format(
+                neighbor_sublattice_id)]
+            for neighbor_number, test_distance in enumerate(
+                    unique_neighbor_distances, start=1):
+                if math.isclose(neighbor_distance, test_distance):
+                    update_row = [x for x in neighbor]
+                    update_row[1] = tuple([update_row[1], neighbor_number])
+            site_neighbors_numbered.append(tuple(update_row))
+
+        site_neighbors_sorted = sorted(
+            site_neighbors_numbered,
+            key=lambda x: (x[0].properties["sublattice"], x[1][1]))
+
+        all_neighbors_sorted.append(site_neighbors_sorted)
+
+    all_neighbors_reduced = []
+    for site_neighbors in all_neighbors_sorted:
+        grouped_neighbors = groupby_list(
+            iterable=site_neighbors,
+            key=lambda x: (x[0].properties["sublattice"], x[1][1]))
+        site_neighbors_reduced = []
+        for neighbor in grouped_neighbors:
+            neighbor_sublattice_id = neighbor[0][0]
+            neighbor_number = neighbor[0][1]
+            neighbor_list = neighbor[1]
+            neighbor_indices = tuple(x[2] for x in neighbor_list)
+            site_neighbors_reduced.append((neighbor_sublattice_id,
+                                           neighbor_number, neighbor_indices))
+        all_neighbors_reduced.append(site_neighbors_reduced)
+
+    return all_neighbors_reduced, unique_sublattice_distances
