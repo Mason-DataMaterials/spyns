@@ -100,6 +100,8 @@ def build_structure(structure_parameters):
     if transformations:
         structure = apply_structure_transformations(structure, transformations)
 
+    structure = sort_spin_sites(pmg_structure=structure)
+
     return structure
 
 
@@ -224,3 +226,13 @@ def apply_structure_transformations(structure, transformations):
                                  apply_transformation(working_structure))
 
     return working_structure
+
+
+def sort_spin_sites(pmg_structure):
+    """Placeholder."""
+    sorted_pmg_structure = pmg_structure.get_sorted_structure(
+        lambda x: (x.frac_coords[2], x.frac_coords[1], x.frac_coords[0]))
+
+    return sorted_pmg_structure
+
+
