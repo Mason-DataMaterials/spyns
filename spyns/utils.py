@@ -8,6 +8,7 @@ __date__ = "September 8, 2017"
 
 import logging
 import math
+from itertools import groupby
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -66,3 +67,27 @@ def convert_spherical_to_cartesian(rho, phi, theta):
         0 if abs(y) < 1E-9 else y,
         0 if abs(z) < 1E-9 else z,
     ]
+
+
+def groupby_list(*args, **kwargs):
+    """Wrapper for itertools.groupby that replaces generators with lists.
+
+    Returns
+    -------
+    list
+        List of tuples containing (grouped_item, grouped_elements)
+
+    Notes
+    -----
+    RussellStewart suggested this implementation on a Stack Overflow post [1]_.
+
+    References
+    ----------
+    .. [1] RussellStewart
+       (https://stackoverflow.com/users/2237635/russellstewart), How do I use
+       Python's itertools.groupby()?, URL (version: 2014-12-28):
+       https://stackoverflow.com/q/20013133
+
+    """
+
+    return [(k, list(g)) for k, g in groupby(*args, **kwargs)]
