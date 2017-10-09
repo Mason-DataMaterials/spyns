@@ -15,7 +15,8 @@ from pathlib import Path
 import ruamel.yaml
 from monty.json import MSONable
 from pymatgen import Lattice, Structure
-from pymatgen.standard_transformations import SupercellTransformation
+from pymatgen.transformations.standard_transformations import \
+    SupercellTransformation
 from ruamel.yaml.scanner import ScannerError
 
 from spyns.utils import convert_spherical_to_cartesian
