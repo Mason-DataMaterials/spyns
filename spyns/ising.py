@@ -215,10 +215,10 @@ class Ising(object):
             System temperature in units of (check units)
 
         """
-        site_x, site_y, site_z = (
+        site_x, site_y, site_z = tuple(
             random.randint(0, self.number_sites_along_xyz - 1),
             random.randint(0, self.number_sites_along_xyz - 1),
-            random.randint(0, self.number_sites_along_xyz - 1), )
+            random.randint(0, self.number_sites_along_xyz - 1))
         neighbors = [
             (site_x - 1, site_y, site_z),
             (site_x + 1, site_y, site_z),
