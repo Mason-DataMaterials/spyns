@@ -10,13 +10,11 @@ import logging
 import logging.config
 from pathlib import Path
 
+import numpy as np
 import pytest
 import ruamel.yaml
-from pymatgen.transformations.standard_transformations import \
-    SupercellTransformation
 
 from spyns.data_structures import SpynsSystem
-from spyns.pmg import find_all_neighbors
 
 __author__ = "James Glasbrenner"
 __copyright__ = "Copyright 2017, Mason DataMaterials Group"
@@ -76,18 +74,17 @@ def test_pmg_structure_load(pmg_iron_structure):
 
 def test_pmg_neighbor_find_sort(pmg_iron_structure):
     """Test finding and sorting neighbors of pymatgen structure."""
+    np.random.seed(7130)
     logger.debug("BEGIN UNITTEST: Find and sort neighbors of a pymatgen "
                  "structure.")
     spyns_system = SpynsSystem.from_yaml(pmg_iron_structure)
-    pmg_structure = spyns_system.pmg_structure
-    pmg_structure.add_site_property("sublattice", [1, 2])
-    supercell_scaling_transformation = (
-        SupercellTransformation.from_scaling_factors(scale_a=4, scale_b=4,
-                                                     scale_c=4))
-    pmg_structure = (
-        supercell_scaling_transformation.apply_transformation(pmg_structure))
-    grouped_neighbors, neighbor_distances = find_all_neighbors(
-        pmg_structure=pmg_structure, cutoff=4.2)
-    logger.debug("\nbcc iron neighbors lists =\n%s", grouped_neighbors)
-    logger.debug("\nbcc iron neighbor distances =\n%s", neighbor_distances)
+    spyns_system.sublattices = [1, 2]
+    spyns_system.scale_supercell([4, 4, 4])
+    spyns_system.neighbors = 4.2
+    spyns_system.exchange = [[1, 1, 1, 2.5], [1, 1, 2, 1], [2, 1, 1, -4],
+                             [2, 2, 1, 2.5], [2, 2, 2, 1], [1, 2, 1, -4]]
+    spyns_system.spins = np.random.choice([-1, 1], size=128)
+    logger.debug("\nbcc iron neighbors lists =\n%s", spyns_system.neighbors)
+    logger.debug("\nbcc iron neighbor distances =\n%s", spyns_system.pairs_df)
+    logger.debug("\nbcc iron sites spins =\n%s", spyns_system.spins)
     logger.debug("END UNITTEST")
