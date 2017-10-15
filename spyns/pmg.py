@@ -11,8 +11,9 @@ import logging
 import math
 import operator
 import sys
-from itertools import groupby
 
+import numpy as np
+import pandas as pd
 from pymatgen import Lattice, Structure
 from pymatgen.transformations.standard_transformations import \
     SupercellTransformation
@@ -49,7 +50,8 @@ def build_structure(structure_parameters):
                     structure_parameters["lattice"]["parameters"]),
                 species=structure_parameters["species"],
                 coords=structure_parameters["coords"],
-                site_properties=site_properties, )
+                site_properties=site_properties,
+            )
 
         except TypeError:
             logger.error("At least one of the structure spacegroup "
@@ -126,7 +128,8 @@ def from_spacegroup_to_structure(sg, crystal_system, lattice_parameters,
         lattice=lattice(**lattice_parameters),
         species=species,
         coords=coords,
-        site_properties=site_properties, )
+        site_properties=site_properties,
+    )
 
     return structure
 
@@ -259,8 +262,6 @@ def group_all_neighbors(pmg_structure, all_neighbors):
     logger.debug("Pre-allocated dict for sublattice distances = %s",
                  unique_sublattice_distances)
 
-    sorted_all_neighbors = []
-
     for site_index, site_neighbors in enumerate(all_neighbors):
         site_sublattice_id = pmg_structure[site_index].properties["sublattice"]
         unique_site_distances = unique_sublattice_distances["{0}".format(
@@ -323,4 +324,41 @@ def group_all_neighbors(pmg_structure, all_neighbors):
                                            neighbor_number, neighbor_indices))
         all_neighbors_reduced.append(site_neighbors_reduced)
 
-    return all_neighbors_reduced, unique_sublattice_distances
+    build_dataframe = []
+    for site_index, site_neighbors in enumerate(all_neighbors_reduced):
+        site_sublattice_id = pmg_structure[site_index].properties["sublattice"]
+        for grouped_neighbors in site_neighbors:
+            neighbor_sublattice_id = grouped_neighbors[0]
+            neighbor_number = grouped_neighbors[1]
+            neighbor_indices = grouped_neighbors[2]
+            for neighbor_index in neighbor_indices:
+                build_dataframe.append(
+                    tuple((site_index, neighbor_index, site_sublattice_id,
+                           neighbor_sublattice_id, neighbor_number)))
+    neighbors_df = np.array(build_dataframe, dtype={
+        "names": [
+            "site_i", "site_j", "sublattice_i", "sublattice_j",
+            "neighbor_number"
+        ],
+        "formats": ["i8", "i8", "i8", "i8", "i8"]
+    })
+    neighbors_df = pd.DataFrame(data=neighbors_df)
+
+    build_dataframe = []
+    for (site_sublattice_id,
+         neighbor_sublattice_distances) in unique_sublattice_distances.items():
+        for (neighbor_sublattice_id,
+             neighbor_distances) in neighbor_sublattice_distances.items():
+            for neighbor_number, distance in enumerate(neighbor_distances,
+                                                       start=1):
+                build_dataframe.append(
+                    tuple((site_sublattice_id, neighbor_sublattice_id,
+                           neighbor_number, distance)))
+    distances_df = np.array(build_dataframe, dtype={
+        "names":
+        ["sublattice_i", "sublattice_j", "neighbor_number", "distance"],
+        "formats": ["i8", "i8", "i8", "f8"]
+    })
+    distances_df = pd.DataFrame(data=distances_df)
+
+    return neighbors_df, distances_df
