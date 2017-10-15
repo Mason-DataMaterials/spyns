@@ -5,17 +5,22 @@ Copyright (c) Mason DataMaterials Group.
 Distributed under the terms of the MIT License.
 
 """
-
 import copy
 import logging
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 import pymatgen
 import ruamel.yaml
 from monty.json import MSONable
+from pymatgen.alchemy.materials import TransformedStructure
+from pymatgen.transformations.standard_transformations import \
+    SupercellTransformation
 from ruamel.yaml.scanner import ScannerError
 
 from spyns.pmg import build_structure, find_all_neighbors
+from spyns.utils import convert_spherical_to_cartesian
 
 __author__ = "James Glasbrenner"
 __copyright__ = "Copyright 2017, Mason DataMaterials Group"
@@ -43,11 +48,15 @@ class SpynsSystem(MSONable):
         self._neighbor_distances = None
         self._spins = None
         self._sublattices = None
+        self._exchange = None
+        self._energy = None
+        self._totenergy = None
+        self._scaling_factors = {}
 
         if pmg_structure and isinstance(pmg_structure, pymatgen.Structure):
             logger.debug("Input structure appears to be a pymatgen.Structure "
                          "object.")
-            self.pmg_structure = pmg_structure
+            self.pmg_structure = TransformedStructure(structure=pmg_structure)
 
         else:
             logger.debug("Input structure appears to not be a "
@@ -56,7 +65,8 @@ class SpynsSystem(MSONable):
 
             try:
                 pmg_structure.keys()
-                self.pmg_structure = self._build_structure(pmg_structure)
+                self.pmg_structure = TransformedStructure(
+                    structure=self._build_structure(pmg_structure))
 
             except AttributeError:
                 logger.debug("Input structure is not a dict-like object. "
@@ -193,15 +203,48 @@ class SpynsSystem(MSONable):
 
         return cls(pmg_structure=spyns_structure)
 
+    def scale_supercell(self, scale_abc):
+        """Placeholder."""
+        scale_a = scale_abc[0]
+        scale_b = scale_abc[1]
+        scale_c = scale_abc[2]
+
+        scale_transformation = SupercellTransformation.from_scaling_factors(
+            scale_a=scale_a, scale_b=scale_b, scale_c=scale_c)
+        self.pmg_structure.append_transformation(scale_transformation)
+
     @property
     def spins(self):
         """Placeholder."""
         return self._spins
 
     @spins.setter
-    def spins(self, value):
+    def spins(self, spins_input):
         """Placeholder."""
-        pass
+        build_dataframe = []
+        if type(spins_input) is list or type(spins_input) is np.ndarray:
+            for site_index, spin in enumerate(spins_input):
+                spin_x = 0
+                spin_y = 0
+                spin_z = spin
+                build_dataframe.append(
+                    tuple([site_index, spin_x, spin_y, spin_z]))
+
+        elif type(spins_input) is dict:
+            for site_index, spin_components in spins_input.items():
+                rho = spin_components["rho"]
+                phi = spin_components["phi"]
+                theta = spin_components["theta"]
+                spin_x, spin_y, spin_z = convert_spherical_to_cartesian(
+                    rho=rho, phi=phi, theta=theta)
+                build_dataframe.append([site_index, spin_x, spin_y, spin_z])
+
+        spins_df = np.array(build_dataframe, dtype={
+            "names": ["site_i", "spin_x", "spin_y", "spin_z"],
+            "formats": ["i8", "f8", "f8", "f8"]
+        })
+        spins_df = pd.DataFrame(data=spins_df)
+        self._spins = spins_df
 
     @property
     def neighbors(self):
@@ -211,20 +254,70 @@ class SpynsSystem(MSONable):
     @neighbors.setter
     def neighbors(self, cutoff):
         """Placeholder."""
-        all_neighbors, neighbor_distances = find_all_neighbors(
-            pmg_structure=self.pmg_structure, cutoff=cutoff)
-        self._neighbors = all_neighbors
-        self._neighbor_distances = neighbor_distances
+        pmg_structure = self.pmg_structure.final_structure
+        structure_history_id = len(self.pmg_structure.structures) - 1
+        neighbors_df, distances_df = find_all_neighbors(
+            pmg_structure=pmg_structure, cutoff=cutoff)
+
+        if self._neighbors:
+            self._neighbors = pd.concat([
+                self._neighbors,
+                neighbors_df.assign(history_id=structure_history_id)
+            ], ignore_index=True)
+
+        else:
+            self._neighbors = neighbors_df.assign(
+                history_id=structure_history_id)
+
+        if self._sublattices:
+            self._sublattices = pd.merge(
+                left=self._sublattices, right=distances_df,
+                on=["sublattice_i", "sublattice_j", "neighbor_number"])
+
+        else:
+            self._sublattices = distances_df
+
+    @property
+    def pairs_df(self):
+        """Placeholder."""
+        return self._sublattices
 
     @property
     def sublattices(self):
         """Placeholder."""
-        return self._sublattices
+        return None
 
     @sublattices.setter
     def sublattices(self, value):
         """Placeholder."""
-        pass
+        self.pmg_structure.final_structure.add_site_property(
+            "sublattice", value)
+
+    @property
+    def exchange(self):
+        """Placeholder."""
+        return self._exchange
+
+    @exchange.setter
+    def exchange(self, exchange_list):
+        """Placeholder."""
+        build_dataframe = []
+        for exchange_ij in exchange_list:
+            sublattice_i, sublattice_j, neighbor_number, exchange = exchange_ij
+            build_dataframe.append(
+                tuple([sublattice_i, sublattice_j, neighbor_number, exchange]))
+        exchange_df = np.array(build_dataframe, dtype={
+            "names":
+            ["sublattice_i", "sublattice_j", "neighbor_number", "exchange_ij"],
+            "formats": ["i8", "i8", "i8", "f8"]
+        })
+        exchange_df = pd.DataFrame(data=exchange_df)
+        if self._sublattices is not None:
+            self._sublattices = pd.merge(
+                left=self._sublattices, right=exchange_df,
+                on=["sublattice_i", "sublattice_j", "neighbor_number"])
+        else:
+            self._sublattices = exchange_df
 
 
 class SimulationData(MSONable):
