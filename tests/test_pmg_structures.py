@@ -15,6 +15,7 @@ import pytest
 import ruamel.yaml
 
 from spyns.data_structures import SpynsSystem
+from spyns.hamiltonian import Hamiltonian
 
 __author__ = "James Glasbrenner"
 __copyright__ = "Copyright 2017, Mason DataMaterials Group"
@@ -81,10 +82,23 @@ def test_pmg_neighbor_find_sort(pmg_iron_structure):
     spyns_system.sublattices = [1, 2]
     spyns_system.scale_supercell([4, 4, 4])
     spyns_system.neighbors = 4.2
-    spyns_system.exchange = [[1, 1, 1, 2.5], [1, 1, 2, 1], [2, 1, 1, -4],
-                             [2, 2, 1, 2.5], [2, 2, 2, 1], [1, 2, 1, -4]]
-    spyns_system.spins = np.random.choice([-1, 1], size=128)
+    exchange_interactions = {
+        (1, 1, 1): 2.5,
+        (1, 1, 2): 1,
+        (1, 2, 1): -4,
+        (2, 2, 1): 2.5,
+        (2, 2, 2): 1
+    }
+    hamiltonian = Hamiltonian(spyns_system.neighbors, exchange_interactions,
+                              "ising")
+    hamiltonian.spins = np.random.choice([-1, 1], size=128)
     logger.debug("\nbcc iron neighbors lists =\n%s", spyns_system.neighbors)
     logger.debug("\nbcc iron neighbor distances =\n%s", spyns_system.pairs_df)
-    logger.debug("\nbcc iron sites spins =\n%s", spyns_system.spins)
+    logger.debug("\nbcc iron sites spins =\n%s", hamiltonian.spins)
+    logger.debug("\nbcc iron sites total energy =\n%s", hamiltonian.energy)
+    logger.debug("\nbcc iron sites exchange array =\n%s", hamiltonian.exchange)
+    logger.debug("\nbcc iron sites neighbors array =\n%s",
+                 hamiltonian.neighbors)
+    logger.debug("\nbcc iron sites neighbors cumindex array =\n%s",
+                 hamiltonian.neighbors_cumindex)
     logger.debug("END UNITTEST")
