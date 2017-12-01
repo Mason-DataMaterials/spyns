@@ -1,0 +1,16 @@
+#!/bin/bash
+
+for i in $(seq 2 1 20)
+do
+	sed -i "13 c\ T=$i " fit.gnu
+	sed -i "14 c\ fit f(x) 'aucf$i.txt' u 1:3 via A, tau " fit.gnu
+	sed -i "17 c\ set output 'fit$i.png' " fit.gnu
+	sed -i "19 c\ plot 'aucf$i.txt' u 1:3 w p pt 7 t 'T=$i', f(x) w l t 'Fit'" fit.gnu
+
+	gnuplot fit.gnu
+
+done
+
+
+
+#rm ising

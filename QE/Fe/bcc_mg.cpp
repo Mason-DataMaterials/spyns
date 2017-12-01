@@ -1,11 +1,9 @@
 //
 //  bcc_mg.cpp
-//  Fe NonMagnetic, Ferromagnetic,
-//  Antiferromagnetic(checkerboard), 
-//  Antiferromagnetic(striped)
+//  cs-mc
 //
 //  Created by Swabir Silayi on 11/25/17.
-//  
+//  Copyright © 2017 Swabir Silayi. All rights reserved.
 //
 
 #include <stdio.h>
@@ -21,21 +19,23 @@
 
 using namespace std;
 
-//number of atoms, positions and distance from ref. atom in box
+double u = 1.0;
+double d = -1.0;
+
+
 const int N = 9826;
 double ** r;
 double ** r_old;
 double * dist = new double [N];
 
-//lattice constant of Fe 
 double a = 5.3970578; //a.u.
-//box-side length
 double L;
-//magnetic spin value
+double rCutOff;
+
 double *Ui;
 
 
-/*to initialize positions and magnetic structure*/
+
 void initPositions(int key) {
     
     r = new double * [N];
@@ -52,11 +52,12 @@ void initPositions(int key) {
     
     
     
-    // find M large enough to fit N atoms on bcc lattice
+    // find M large enough to fit N atoms on an fcc lattice
     int M = 1;
     while (2 * M * M * M < N)
         ++M;
     L = a*M;           // lattice constant of conventional cell
+    rCutOff = 0.5*L;
     
     // 2 atomic positions in bcc unit cell
     double dx[2] = {0.0, 0.5};
@@ -82,22 +83,22 @@ void initPositions(int key) {
                         
                         if (key == 1)//fm
                         {
-                                Ui[n] = 1.0;
+                                Ui[n] = u;
                         }
 
                         
                         if (key == 2)//afm_1
                         {
                             if (n%2 == 0 )
-                                Ui[n] = 1.0;
+                                Ui[n] = u;
                             else if (n%2 == 1 )
-                                Ui[n] = -1.0;
+                                Ui[n] = d;
                         }
 
                         if (key == 3)//afm_2
                         {
-                            if(n==0) Ui[n] = 1.0;
-                            else if(n==1) Ui[n] = -1.0;
+                            if(n==0) Ui[n] = u;
+                            else if(n==1) Ui[n] = d;
                             
                             else if (n%2 == 0 && n != 0)
                                 Ui[n] = -Ui[n-2];
@@ -110,7 +111,6 @@ void initPositions(int key) {
         }
     }
     
-    //find center of mass and shift all atoms
     double rCM[3] = {0, 0, 0};
     for (int n = 0; n < N; n++)
         for (int i = 0; i < 3; i++)
@@ -173,11 +173,7 @@ void initPositions(int key) {
     
 }
 
-/* 
-* to calculate the 1st and 2nd
-* nearest neighbor energies
-* of reference atom at (0,0,0)
-*/
+
 double energy(int key){
     
     
@@ -190,27 +186,29 @@ double energy(int key){
     double h1 = 0.0;
     double h2  = 0.0;
     
-    /*save to file for visualization*/
+    
     ofstream file;
     if (key == 0) file.open("nm.xyz");
     else if (key == 1) file.open("fm.xyz");
     else if (key == 2) file.open("afm_1.xyz");
     else if (key == 3) file.open("afm_2.xyz");
     
-    /* reference atom + 1st nn + 2nd nn
-    /* 1+8+6 = 15
-    */
     file <<"15 \n";
     file << "Lattice=0 0 0 0.5 0.5 0.5 Properties=species:S:1:pos:R:3 Time=0 \n";
     
+    
+    
+    
+    
     for (int i = 0; i < N; i++){
-         
+        
+        
         if ( round (dist[i] - nn[0]) == 0.0){
             if(Ui[i] == 0)
                 file << "Fe" <<"\t";
-            if(Ui[i] == 1)
+            if(Ui[i] == u)
                 file << "Fe1" <<"\t";
-            if(Ui[i] == -1)
+            if(Ui[i] == d)
                 file << "Fe2" <<"\t";
             
             for (int j = 0; j < 3; j++)
@@ -228,9 +226,9 @@ double energy(int key){
         if (round (dist[i] - nn[1]) == 0.0){
             if(Ui[i] == 0)
                 file << "Fe" <<"\t";
-            if(Ui[i] == 1)
+            if(Ui[i] == u)
                 file << "Fe1" <<"\t";
-            if(Ui[i] == -1)
+            if(Ui[i] == d)
                 file << "Fe2" <<"\t";
             
             for (int j = 0; j < 3; j++)
@@ -244,15 +242,17 @@ double energy(int key){
         
     }
     
+    
     for (int i = 0; i < N; i++){
+        
         
         if ( round(dist[i]-nn[2]) == 0.0){
             
             if(Ui[i] == 0)
                 file << "Fe" <<"\t";
-            if(Ui[i] == 1)
+            if(Ui[i] == u)
                 file << "Fe1" <<"\t";
-            if(Ui[i] == -1)
+            if(Ui[i] == d)
                 file << "Fe2" <<"\t";
             
             for (int j = 0; j < 3; j++)
@@ -260,12 +260,13 @@ double energy(int key){
             
             file << "\n";
             
+            
+            
             h2 += Ui[i];
         }
         
     }
     
-    /*energy matrix*/
     
     if (key == 0) {    cout << "MG    \t Si \t Sj1 \t Sj2 \n";
                        cout << "NM    \t";
@@ -281,7 +282,6 @@ double energy(int key){
     
 }
 
-/*to save grind configuration to file*/
 void record(string filename){
     ofstream file; file.open(filename.c_str());
     
@@ -292,12 +292,12 @@ void record(string filename){
     {
         if(Ui[i] == 0)
             file << "Fe" <<"\t";
-        if(Ui[i] == 1)
+        if(Ui[i] == 0.8)
             file << "Fe1" <<"\t";
-        if(Ui[i] == -1)
+        if(Ui[i] == -0.1)
             file << "Fe2" <<"\t";
         for (int j = 0; j < 3; j++)
-            file << r[i][j] <<setw(12)<< "\t";
+            file << r[i][j] << setw(12)<< "\t";
         
         file << "\n";
         
@@ -311,17 +311,13 @@ void record(string filename){
 
 int main(){
     
-    
-    /*keys for initalization*/
     int nm = 0;
     int fm = 1;
     int afm1 = 2;
     int afm2  = 3;
     
     
-    /*initialize positions and magnetic spins 
-     * using the keys
-     */
+    
     initPositions(nm);
     record("init_nm.xyz");
     double H = energy(nm);
