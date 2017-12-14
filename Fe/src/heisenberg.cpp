@@ -676,7 +676,7 @@ void aucf(double * si_hist, double MAvg, int MCSteps, int T)
         Mp[i][REAL] = si_hist[i] - MAvg;
         Mp[i][IMAG] = 0;
     }
-     int N = 1024; 
+     
     fft(Mp, Mp_w, MCSteps);
 #pragma omp parallel for     
     for (i = 0; i < MCSteps; i++){
@@ -729,8 +729,10 @@ void plot_script(double T_min, double T_max, double t_steps)
 int main(int argc, char *argv[]){
 
     
-    //lattice dimension, lenght of single side
-     int N = 250; 
+    
+     int N = 1024;            //number of atoms 
+     int MCSteps = 1000000;     //number of monte carlo moves 
+     int eqSteps = 0.2*MCSteps;          //number of equilibration steps
     
     //external magnetic field
     double h = 0.0;                     
@@ -739,8 +741,7 @@ int main(int argc, char *argv[]){
     double * J = new double [2];
     J[0] = 7.52373031e-03;   J[1] = 2.55273958e-03;
     
-    int MCSteps = 50000;                //number of Monte Carlo moves
-    int eqSteps = 0.2*MCSteps;          //number of equilibration steps
+    
     
     
     double T;  
@@ -796,9 +797,9 @@ int main(int argc, char *argv[]){
     
     int t_count = 1;
     
-    double T_min = 400.0;
+    double T_min = 600.0;
     double T_max = 1200.0;
-    double t_steps = 50.0;
+    double t_steps = 12.0;
     double dT = (T_max - T_min) / t_steps;
     
     //loop over T values

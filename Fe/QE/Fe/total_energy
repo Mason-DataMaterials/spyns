@@ -1,0 +1,4 @@
+#total energies scf calculation for Fe using QE
+nm   1  total_energy              =     -55.52254687 Ry
+fm   1  total_energy              =     -55.55988631 Ry
+afm  2  total_energy              =    -111.05457646 Ry
