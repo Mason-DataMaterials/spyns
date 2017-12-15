@@ -730,8 +730,8 @@ void plot_script(double T_min, double T_max, double t_steps)
 
 int main(int argc, char *argv[]){
 
-     int N = 1024;            //number of atoms 
-     int MCSteps = 50000;     //number of monte carlo moves 
+     int N = 8192;            //number of atoms 
+     int MCSteps = 150000;     //number of monte carlo moves 
     
     
     

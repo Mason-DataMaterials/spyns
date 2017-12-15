@@ -1,0 +1,38 @@
+Fitting steps to determine the exchange constants for Fe:
+-total energies for non-magnetic, ferromagnetic, anti-ferromagnetic(checkerboard) and
+ anti-ferromagnetic(striped) calculated from Quantum Espresso(QE).
+
+-corresponding first and second nearest neighbor energies calculated for the different 
+ cases using bcc_mg.cpp. The different configurations are as shown in the figures 
+ nm.png, ferromagnetic.png, afm_striped.png and afm_checkerboard.png. 
+
+-fit is done using jconst_fit.py and resulting values used in heisenberg.cpp for the 
+ simulation.
+
+Energies from QE:
+
+ NM   1     -54.94490706 Ry
+ FM   1     -55.12807369 Ry
+ AFM1 2    -110.49690675 Ry
+ AFM2 4    -220.84368080 Ry
+
+1st and 2nd nearest neighbor interactions:
+
+ MG    		Sj1 	Sj2 
+ NM    		0	0
+ FM    		8	6
+ AFM_1 		-8	6
+ AFM_2 		0	-6
+
+Exchange constants from least squares fit in Ry:
+
+J_1 = 7.52373031e-03, J_2 = 2.55273958e-03
+
+Resulting curves for Magnetization and energy are shown in the plots for N=250 and 
+N=1024.
+
+The critical temperature, Tc, comes at around 1000K, compared to the experimental 1043K 
+for Fe.
+
+
+ 

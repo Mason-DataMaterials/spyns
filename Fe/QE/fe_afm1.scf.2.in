@@ -1,0 +1,30 @@
+ &control
+    pseudo_dir = '.',
+    outdir='./tmp'
+    prefix='nio',
+ /
+ &system
+    ibrav=  0, celldm(1)=5.42, nat=  4, ntyp= 2,
+    ecutwfc = 30.0, ecutrho = 300.0,
+    occupations='smearing', smearing='mv', degauss=0.02,
+    nspin=2, 
+    nbnd = 16,
+    starting_magnetization(1)= 1, starting_magnetization(2)=-1,
+ /
+ &electrons
+    mixing_beta = 0.3 
+ /
+CELL_PARAMETERS
+-0.707  0.707  0.707
+ 0.707 -0.707  0.707
+ 0.500  0.500 -0.50
+ATOMIC_SPECIES
+ Fe  1.  Fe.pz-nd-rrkjus.UPF
+ Fe1 1.  Fe.pz-nd-rrkjus.UPF
+ATOMIC_POSITIONS crystal
+ Fe   0.00  0.00  0.00
+ Fe1  0.50  0.50  0.00
+ Fe   0.50  0.00  0.50 
+ Fe1  0.00  0.50  0.50
+K_POINTS automatic
+16 16 16 0 0 0
