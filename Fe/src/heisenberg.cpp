@@ -7,7 +7,7 @@
 #include <string>
 #include <random>
 #include <omp.h>
-#include <fftw3.h>
+//#include <fftw3.h>
 
 
 #define REAL 0
@@ -91,15 +91,15 @@ void initialize(int N, double& L, double a, double ** si ){
     }
     
     /*
-    cout << N << "\n";
-    cout << " " << "\n";
-    
-    for (int i = 0; i< N; i++){
-    
-        cout << "Fe" << "\t" << si[i][0] << "\t" << si[i][1] << "\t" << si[i][2] << "\t"
-                             << si[i][5] << "\t" << si[i][6] << "\t" << si[i][7] << "\n";
-    }
-    */
+     *    cout << N << "\n";
+     *    cout << " " << "\n";
+     *    
+     *    for (int i = 0; i< N; i++){
+     *    
+     *        cout << "Fe" << "\t" << si[i][0] << "\t" << si[i][1] << "\t" << si[i][2] << "\t"
+     *                             << si[i][5] << "\t" << si[i][6] << "\t" << si[i][7] << "\n";
+}
+*/
     
     
     
@@ -162,18 +162,18 @@ void bcc_neighbor_lists(int N, double L, double a, double ** si, double ** first
 {
     
     double nn_bcc_distances[14] = {0.0, sqrt(3.0)/2.0, 1.0, sqrt(2.0), sqrt(11.0/4.0),
-    sqrt(3.0), 2.0, sqrt(19.0/4.0), sqrt(5.0), sqrt(6.0),
-    sqrt(27.0/4.0), sqrt(8.0), sqrt(35.0/4.0), 3.0};
-
-
-    for (int p = 0; p < N; p++)
-       { 
+        sqrt(3.0), 2.0, sqrt(19.0/4.0), sqrt(5.0), sqrt(6.0),
+        sqrt(27.0/4.0), sqrt(8.0), sqrt(35.0/4.0), 3.0};
+        
+        
+        for (int p = 0; p < N; p++)
+        { 
             int nn1_count = 0;
             int nn2_count = 0;
             
             for (int i = 0; i < N; i++)
-	    {
-                                
+            {
+                
                 double rSqd =0.0;
                 double dr[3] = {0.0};
                 double dist =0.0;
@@ -195,36 +195,36 @@ void bcc_neighbor_lists(int N, double L, double a, double ** si, double ** first
                 
                 rSqd = dr[0]*dr[0] + dr[1]*dr[1] + dr[2]*dr[2];
                 dist = sqrt(rSqd);
-               
+                
                 if (p != i)
-		{
-			
-			double diff1 = round(dist-nn_bcc_distances[1]*a) ;
-                
-               		if ( diff1 == 0.0)//1e-4 && dist > nn_bcc_distances[0]*a  )
-                	{
-                   
-                   		first_nn[p][nn1_count] = i;
-                    		nn1_count+=1;
+                {
                     
-                	}
+                    double diff1 = round(dist-nn_bcc_distances[1]*a) ;
+                    
+                    if ( diff1 == 0.0)//1e-4 && dist > nn_bcc_distances[0]*a  )
+                    {
+                        
+                        first_nn[p][nn1_count] = i;
+                        nn1_count+=1;
+                        
+                    }
+                    
+                    double diff2 = round(dist-nn_bcc_distances[2]*a) ;
+                    
+                    if ( diff2 == 0.0) //1e-4 && dist > nn_bcc_distances[1]*a )
+                    {
+                        second_nn[p][nn2_count] = i;
+                        nn2_count+=1;
+                        
+                    } 
+                }
                 
-                	double diff2 = round(dist-nn_bcc_distances[2]*a) ;
-                 
-                	if ( diff2 == 0.0) //1e-4 && dist > nn_bcc_distances[1]*a )
-                	{
-                    		second_nn[p][nn2_count] = i;
-                    		nn2_count+=1;
-                         
-                	} 
-		}
-               
             }//end for i
-           
-       }//end for p
- 
- return;    
- 
+            
+        }//end for p
+        
+        return;    
+        
 }
 
 
@@ -241,19 +241,19 @@ void bcc_neighbor_lists(int N, double L, double a, double ** si, double ** first
 void neighbors(int N, int point, int xyz, double * sj, double ** si, double ** first_nn, double ** second_nn)
 {    
     
-   
+    
     
     for (int i =0; i<8; i++){
         int index = int (first_nn[point][i]);
         sj[0] += si[index][xyz];
     }
-        
+    
     for (int i =0; i<6; i++){
         int index = int (second_nn[point][i]);
         sj[1] += si[index][xyz];
     }
-        
-   
+    
+    
     return;
 }
 
@@ -296,7 +296,7 @@ double Energy(int N, double ** si, double ** first_nn, double ** second_nn, doub
         neighbors(N, point, 5, sj_x, si, first_nn, second_nn );
         neighbors(N, point, 6, sj_y, si, first_nn, second_nn );
         neighbors(N, point, 7, sj_z, si, first_nn, second_nn );
-         
+        
         Hi[0] = Hi[0] + ( (si[i][5]*-(J[0]*sj_x[0] + J[1]*sj_x[1]) ) - h*si[i][5] );
         Hi[1] = Hi[1] + ( (si[i][6]*-(J[0]*sj_y[0] + J[1]*sj_y[1]) ) - h*si[i][6] );
         Hi[2] = Hi[2] + ( (si[i][7]*-(J[0]*sj_z[0] + J[1]*sj_z[1]) ) - h*si[i][7] );
@@ -311,8 +311,8 @@ double Energy(int N, double ** si, double ** first_nn, double ** second_nn, doub
 
 
 
- 
- /* dE_X(N, si, h, J, point, X)
+
+/* dE_X(N, si, h, J, point, X)
  * calculates the change in energy if a spin site is flipped
  * takes in: N - length of one side
  *           si - 3D lattice of spin sites
@@ -330,7 +330,7 @@ double dE_theta (       int N,
                         double * J, 
                         int point, 
                         double new_theta 
-                )
+)
 {
     double * sj_x = new double [2];
     sj_x[0] = sj_x[1] = 0;
@@ -378,7 +378,7 @@ double dE_phi (         int N,
                         double * J, 
                         int point, 
                         double new_phi
-              )
+)
 {
     double * sj_x = new double [2];
     sj_x[0] = sj_x[1] = 0;
@@ -417,8 +417,8 @@ double dE_phi (         int N,
     return dE;
 }
 
- 
- /* MC_move(N, si, first_nn, second_nn, h, J, M, H, T)
+
+/* MC_move(N, si, first_nn, second_nn, h, J, M, H, T)
  *  carries out the monte carlo  move at each time step
  *  to update the xyz spin values for all atoms and
  *  update the energy, H, and magnetization, M, values.
@@ -437,7 +437,7 @@ double dE_phi (         int N,
 
 
 void MC_move(int N, double ** si,  double ** first_nn, double ** second_nn, 
-                            double h, double *J, double &M, double &H, double T)
+             double h, double *J, double &M, double &H, double T)
 {
     double phi, theta, p;
     
@@ -450,27 +450,27 @@ void MC_move(int N, double ** si,  double ** first_nn, double ** second_nn,
         uniform_int_distribution<int> nsites_gen(0, N - 1);
         int point = nsites_gen(engine);
         
-       
-        
+            
+         
         //theta update, phi constant
         theta = 1.0/cos(1.0-2.0 * (double)dist(engine));
         
         double dE = dE_theta (N, si, first_nn, second_nn, h, J, point, theta );
-    
+        
         int i = sweep;
         
         if (dE <= 0.0)
         {
-                //theta
-                si[i][3] = theta;
-                //Sx
-                si[i][5] = sin(si[i][3])*cos(si[i][4]);
-                //Sy
-                si[i][6] = sin(si[i][3])*sin(si[i][4]);
-                //Sz
-                si[i][7] = cos(si[i][3]);
+            //theta
+            si[i][3] = theta;
+            //Sx
+            si[i][5] = sin(si[i][3])*cos(si[i][4]);
+            //Sy
+            si[i][6] = sin(si[i][3])*sin(si[i][4]);
+            //Sz
+            si[i][7] = cos(si[i][3]);
             
-                H = H+dE;
+            H = H+dE;
         }
         else {
             
@@ -486,14 +486,14 @@ void MC_move(int N, double ** si,  double ** first_nn, double ** second_nn,
                 si[i][6] = sin(si[i][3])*sin(si[i][4]);
                 //Sz
                 si[i][7] = cos(si[i][3]);
-            
+                
                 H = H+dE;
                 
             }
             
             
         } //end if for theta
-         
+        
         
         //phi update, theta constant
         phi = M_PI*2.0* (double)dist(engine);
@@ -503,13 +503,13 @@ void MC_move(int N, double ** si,  double ** first_nn, double ** second_nn,
         if (dE <= 0.0)
         {
             
-                //phi
-                si[i][4] = phi;
-                //Sx
-                si[i][5] = sin(si[i][3])*cos(si[i][4]);
-                //Sy
-                si[i][6] = sin(si[i][3])*sin(si[i][4]);
-                
+            //phi
+            si[i][4] = phi;
+            //Sx
+            si[i][5] = sin(si[i][3])*cos(si[i][4]);
+            //Sy
+            si[i][6] = sin(si[i][3])*sin(si[i][4]);
+            
         }
         else {
             p = dist(engine);
@@ -528,7 +528,7 @@ void MC_move(int N, double ** si,  double ** first_nn, double ** second_nn,
         
     }//end sweep
     
-
+    
     free (point);
     
     return;
@@ -567,7 +567,7 @@ void ave_var(int cc, double &Avg, double &Var, double U)
  *           J - nearest neighbor coupling constant
  */
 
-void save_data(int N, double * data)
+void save_data(int N, int MCSteps,double * data)
 {
     
     double T = data[8];
@@ -581,13 +581,10 @@ void save_data(int N, double * data)
     std::string hmf = hf.str();
     hfile.open(hmf.c_str(), ios_base::app);
     
-    if (T == 1){
-        hfile << "T\t<M>\tM_Var\t<M^2>\tM^2_Var\t"
-        << "<E>\tE_Var\t<E^2>\tE^2_Var\t"
-        << "X\tC_v\n" ;
-    }
     
-    double N3 = (double)N*N*N;
+    hfile << "T\t<M>\tM_Var\t<M^2>\tM^2_Var\t"
+    << "<E>\tE_Var\t<E^2>\tE^2_Var\t"
+    << "X\tC_v\n" ;
     
     
     double MAvg = data[0], HAvg=data[4], MVar= data[1], HVar = data[5];
@@ -596,12 +593,13 @@ void save_data(int N, double * data)
     
     double beta = 1.0/kT;
     double beta2 = beta*beta;
+    double MN = 1.0/double (MCSteps*N);
     
     //Susceptibility
-    double X = beta*N3*( M2Avg - (MAvg*MAvg));
+    double X = (beta*MN)*( M2Avg - (MAvg*MAvg));
     
     //Specific Heat
-    double Cv = (beta2/N3)*(H2Avg - (HAvg*HAvg));
+    double Cv = (beta2/MN)*(H2Avg - (HAvg*HAvg));
     
     //write to file
     hfile << T << "\t"
@@ -617,250 +615,141 @@ void save_data(int N, double * data)
 }
 
 
-void fft(fftw_complex *in, fftw_complex *out, int L)
-{
-    
-    
-    fftw_plan plan = fftw_plan_dft_1d(L, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
-    fftw_execute(plan);
-    fftw_destroy_plan(plan);
-    fftw_cleanup();
-    
-    return;
-    
-}
-
-void ifft(fftw_complex *in, fftw_complex *out, int L)
-{
-    
-    fftw_plan plan = fftw_plan_dft_1d(L, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
-    
-    fftw_execute(plan);
-    fftw_destroy_plan(plan);
-    fftw_cleanup();
-    
-    
-    for (int i = 0; i < L; ++i) {
-        out[i][REAL] /= L;
-        out[i][IMAG] /= L;
-    }
-}
-
-
-/* aucf(si_hist, MAvg, MCSteps, T)
- * calculates the magnetization autocorrelation  at
- * each simulation temperature and saves to file
- *
- * takes in: si_hist - list of magnetization values at every timestep
- *           MAvg - Average calculated Magnetizatization
- *           MCSteps - number of Monte Carlo steps
- *           T - simulation temperature
- */
-
-void aucf(double * si_hist, double MAvg, int MCSteps, int T)
-{
- 
-    ofstream acfile;
-    std::ostringstream acf;
-    acf <<"aucf"<<T<<".txt" ;
-    std::string aucf = acf.str();
-    acfile.open(aucf.c_str());
-    
-    
-    fftw_complex Mp[MCSteps];
-    fftw_complex Mp_w[MCSteps];
-    fftw_complex Xw[MCSteps];
-    fftw_complex Xt[MCSteps];
-    
-    int i,t;
-#pragma omp parallel for private (i) shared (MAvg)    
-    for (i = 0; i < MCSteps; i++){
-        Mp[i][REAL] = si_hist[i] - MAvg;
-        Mp[i][IMAG] = 0;
-    }
-     
-    fft(Mp, Mp_w, MCSteps);
-#pragma omp parallel for     
-    for (i = 0; i < int(0.5*MCSteps); i++){
-        Xw[i][REAL]= pow(abs(Mp_w[i][REAL]), 2.);
-        Xw[i][IMAG] = 0;
-    }
-    
-    ifft(Xw, Xt, MCSteps);
-    
-    for (t = 0; t < int(0.5*MCSteps); t++){
-    
-       acfile << t  << "\t" << Xt[t][REAL] << "\t" << Xt[t][REAL] / Xt[0][REAL] << "\n"; 
-        
-    }
-    
-    acfile.close();
-    
-    
- return;
-    
-}
-/* plot_script (T_min, T_max, t_steps)
- * Generates script for visualization with gnuplot
- * takes in: T_min - minimum simulation temperature
- *           T_max - maximum simulaiton temperature
- *           t_steps - step size between temperatures
- *                      during simulation.
-*/                       
-void plot_script(double T_min, double T_max, double t_steps)
-{
-    ofstream gfile; gfile.open("aucfplot.gnu", ios_base::app);
-    
-    double dT = (T_max - T_min)/ t_steps;
-    
-    int t_count = 1;
-    for (double T = T_min; T <=T_max; T+=dT)
-    {
-        if (T == T_min)
-            gfile << "plot 'aucf" <<t_count<<".txt' u 1:3 w l t 'T="<<T<<"',\\"<<"\n";
-        else if (T == T_max)
-            gfile << "     'aucf" <<t_count<<".txt' u 1:3 w l t 'T="<<T<<"'" <<"\n";
-        else 
-            gfile << "     'aucf" <<t_count<<".txt' u 1:3 w l t 'T="<<T<<"',\\"<<"\n";
-            
-    }
-    
-}
 
 
 int main(int argc, char *argv[]){
-
-     int N = 1024;            //number of atoms 
-     int MCSteps = 50000;     //number of monte carlo moves 
     
-    
-    
-     int eqSteps = 0.2*MCSteps;          //number of equilibration steps
+    int N;            	//number of atoms 
+    int MCSteps;      	//number of monte carlo moves 
+    int freq;		//sampling frequency
+    double T;  		//simulation temperature
     
     //external magnetic field
-    double h = 0.0;                     
+    double h;                     
     
     //coupling constant (Ry)
     double * J = new double [2];
-    J[0] = 7.52373031e-03;   J[1] = 2.55273958e-03;
-    
-    
-    
-    
-    double T;  
     
     //boltzmann constant(Ry K^-1)
     double kB = 0.0000063306;
     
     
     //lattice constant for Fe
-    double a = 5.3970578; //a.u.
+    double a;//a.u.
     double L;
     
+    char * temp = new char[30];
     
-    double **si = new double * [N];//spin configuration
+    ifstream infile("hinput");
+    if (infile)
+    {
+        infile>>temp>>temp>>N;
+        infile>>temp>>temp>>a;
+        infile>>temp>>temp>>T;
+        infile>>temp>>temp>>h;
+        infile>>temp>>temp>>J[0];
+        infile>>temp>>temp>>J[1];
+        infile>>temp>>temp>>MCSteps;
+        infile>>temp>>temp>>freq;
+        
+        infile.close();
+    }
+    else{ cout << "hinput not found!\n"; return 0; }
+    
+
+    //number of equilibration steps
+    int eqSteps = 0.5*MCSteps;          
+    
+    //initialize spin configuration
+    double **si = new double * [N];
     for (int i = 0; i < N; i++)
         si[i] = new double [8];
     
-      
+    
     initialize(N, L, a, si );
-
-     
+    
+    //populate neighbor lists
     double **first_nn = new double * [N];
     double **second_nn = new double * [N];
-     for (int i = 0; i < N; i++)
-        {
-            first_nn[i] = new double [8];
-            second_nn[i] = new double [6];
-        }
-       
+    for (int i = 0; i < N; i++)
+    {
+        first_nn[i] = new double [8];
+        second_nn[i] = new double [6];
+    }
+    
     bcc_neighbor_lists(N, L, a, si, first_nn, second_nn);
     
     
-    double * si_hist = new double [MCSteps+eqSteps];
-        
-    for (int i = 0; i < eqSteps+MCSteps; i++) 
-    {
-        si_hist[i] = 0.0;
-    }
+    //calculate initial Magnetization and Energy
+    double M = Magnetization(N, si);
+    double H = Energy(N, si, first_nn, second_nn, h, J);
     
     
+    //Average and Variance
+    double MAvg=0.0, HAvg=0.0, MVar=0.0, HVar=0.0;
+    double M2Avg=0.0, H2Avg=0.0, M2Var=0.0, H2Var=0.0;
+    
+    //holder for final calculated quantities
     double * data = new double  [10];
     for (int i =0; i < 10; i++) data[i] = 0.0;
     
-
-    double M = Magnetization(N, si);
-   
-    double H = Energy(N, si, first_nn, second_nn, h, J);
     
-     
-     //Average and Variance
-    double MAvg, HAvg, MVar, HVar;
-    double M2Avg, H2Avg, M2Var, H2Var;
+    double kT = kB*T;
     
-    int t_count = 1;
-    
-    double T_min = 600.0;
-    double T_max = 1350.0;
-    double t_steps = 25.0;
-    double dT = (T_max - T_min) / t_steps;
-    
-    //loop over T values
-    for (T = T_min; T <= T_max; T+=dT)
+    //Equilibration steps (burn-in)
+    for (int step = 0; step < eqSteps; step++)
     {
-        
-        double kT = kB*T;
-        
-        //Equilibration steps (burn-in)
-        for (int step = 0; step < eqSteps; step++)
-        {
-            MC_move(N, si, first_nn, second_nn, h, J, M, H, kT);
-            //cout << step << "\t" <<M <<"\t" << MAvg << "\t" << HAvg << "\n";
-        }
-        
-        
-        //Production steps
-        for (int step = 0; step < MCSteps; step++)
-        {
-            /*each move is a complete lattice sweep - N*N*N steps */
-            MC_move(N, si, first_nn, second_nn, h, J, M, H, kT);
-            
-            M = Magnetization(N, si);
-            H = Energy(N, si, first_nn, second_nn, h, J);
-            
-            ave_var(step, MAvg, MVar, M);
-            ave_var(step, HAvg, HVar, H);
-            ave_var(step, M2Avg, M2Var, M*M);
-            ave_var(step, H2Avg, H2Var, H*H);
-            
-            si_hist[step] = M;
-            
-            
-        }//end loop over MCSteps
-        
-        //accumulate data
-        data[0] = MAvg; data[1] = MVar;
-        data[2] = M2Avg; data[3] = M2Var;
-        data[4] = HAvg; data[5] = HVar;
-        data[6] = H2Avg; data[7] = H2Var;
-        data[8] = T; data[9] = kB;
-        
-        cout << "saving to file ... \n";
-        save_data(N, data);
-        
-        aucf(si_hist, MAvg, MCSteps, t_count);
-        
-        
-        cout << "Done : T = " << T << "\t M = " << MAvg << "\t H = " << HAvg << "\n";
-        
-        t_count+=1;
-        
-    }//end loop over T
+        MC_move(N, si, first_nn, second_nn, h, J, M, H, kT);
+        //cout << step << "\t" <<M <<"\t" << MAvg << "\t" << HAvg << "\n"; 
+    }
     
     
-
-    plot_script(T_min, T_max, t_steps);
+    int cc = 0;
+    ofstream afile; afile.open("aucf.out");
+    
+    //Production steps
+    for (int step = 0; step < MCSteps; step++)
+    {
+        //each move is a complete lattice sweep - N*N*N steps 
+        MC_move(N, si, first_nn, second_nn, h, J, M, H, kT);
         
+        M = Magnetization(N, si);
+        H = Energy(N, si, first_nn, second_nn, h, J);
+        
+        ave_var(cc, MAvg, MVar, M);
+        ave_var(cc, HAvg, HVar, H);
+        ave_var(cc, M2Avg, M2Var, M*M);
+        ave_var(cc, H2Avg, H2Var, H*H);
+        
+        //sample every 'freq' steps
+        if (step % freq ==0 )
+        {              
+            //save snapshot to aucf.out
+            afile << cc <<"\t" << M <<"\t" << H << "\n";
+            
+            cc+=1;
+            
+        }//end if freq
+        
+    }//end loop over MCSteps
+    
+    //accumulate data
+    data[0] = MAvg; data[1] = MVar;
+    data[2] = M2Avg; data[3] = M2Var;
+    data[4] = HAvg; data[5] = HVar;
+    data[6] = H2Avg; data[7] = H2Var;
+    data[8] = T; data[9] = kB;
+    
+    save_data(N,MCSteps,data);
+    
+    afile.close();    
+    
+    free(data);
+    free(si);
+    free(first_nn);
+    free (second_nn);
+    
+    
     
     return 0;
 }

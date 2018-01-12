@@ -35,4 +35,76 @@ The critical temperature, Tc, comes at around 1000K, compared to the experimenta
 for Fe.
 
 
+Updates [01-12-2018]:
+The codes now uses an input file in the format:
+
+"""
+number_of_atoms  = 2662
+lattice_constant = 5.3970578
+temperature = 200
+external_field(h) = 0.0
+exchange_constant(1st_nn) = 1.0e-03
+exchange_constant(2nd_nn) = 0.7e-03
+iterations = 400000
+sampling_frequency = 10
+
+"""
+The nn cutoff is still 2.
+
+The sections for calculating the autocrrelation have been separated. I wrote that part 
+in both C++ and Python, but the Python FFT was giving different results so I'm using the
+C++ for the moment.
+
+Profiling results:
+Using gprof to profile the code, the results show that the program spends most time on 
+the Monte Carlo step. The functions that end up being called most frequently are therefore:
+ - the random number generator (at every iteration of the sweep in a MC step) to pick a 
+   site
+ - the neighbors function to determine the 1st and 2nd nn sites of the randomly picked site
+ - the delta function to determine whether the spin of the site is flipped or not
+
+
+Snippet of profiling output:
+
+"""
+
+index % time    self  children    called     name
+[1]     99.2    0.00    3.09                 main [1]
+[2]     82.0    0.09    2.46   15000         MC_move(int, double**, double**, double**, double, double*, double&, double&, double) [2]
+[3]     59.8    1.86    0.00 30000750         neighbors(int, int, int, double*, double**, double**, double**) [3]
+[4]     27.9    0.17    0.70 3750000         dE_phi(int, double**, double**, double**, double, double*, int, double) [4]
+[5]     25.6    0.10    0.70 3750000         dE_theta(int, double**, double**, double**, double, double*, int, double) [5]
+[6]     21.8    0.04    0.64 12980913         double std::uniform_real_distribution<double>
+
+
+
+[10]    16.6    0.05    0.47   10001         Energy(int, double**, double**, double**, double, double*) [10]
+
+"""
+
+Optimizations:
+-The neighbor sites are prepoluted in a neighbor list (this is included)
+-Rewrite tot reduce the number of calls to the neighbor function to once per site
+ in the MC step (working on).
+-Precalculating the random numbers(?)
+
+
+Comparing with references:
+I used values for bcc Fe Heisenberg exchange constants in Ref [1] to calculate and plot
+for different sized grids. From the plots (ref_fe_plots), these constants do not work. They give a Tc
+of ~200K.
+
+Both the fit (fit_fe_plots) and the reference constants do show a downward shift as the size N of 
+the grid is increased. Not sure how to interpret that. 
+
+
+
+Reference for Fe BCC Heisenberg Constants:
+[1] Cardias, R., et al. "The Bethe-Slater curve revisited; new insights from electronic 
+    structure theory." Scientific Reports 7.1 (2017): 4058.
+
+
+
+
+
  

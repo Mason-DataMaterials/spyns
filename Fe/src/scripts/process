@@ -1,0 +1,36 @@
+#!/bin/bash
+N=686
+
+if [ ! -d Results ]; then 
+	mkdir Results/
+else 
+	rm -r Results/*
+fi
+if [ ! -d aucf_files ]; then 
+	mkdir aucf_files 
+else 
+	rm -r aucf_files/*
+fi
+
+rm *.txt
+
+for i in $(seq 300 50 1350)
+do 
+      cp ../$i/aucf.out aucf_files/$i 
+      grep $i ../$i/data_$N.txt >> data.txt	
+done
+
+sed -i "2 c\N = $N " isingplot.gnu
+gnuplot isingplot.gnu
+
+sed -i "2 c\N=$N " fit
+cat <<EOF > aucf.in
+number of atoms = $N
+number of steps = 500000
+start temp = 300.0
+end temp = 1350.0
+temp step = 50.0 
+EOF
+./aucf >$N.OUT
+
+#python3 aucf.py

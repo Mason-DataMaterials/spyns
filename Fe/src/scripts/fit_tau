@@ -1,0 +1,38 @@
+#!/bin/bash
+N=686 
+rm fit.txt
+for i in $(seq 400 50 1350)
+do 
+     
+	path="aucf_files/aucf_$i.txt"
+	cat << EOF > fit.gnu
+	#!/bin/bash
+	set xrange [ 0.00000 : 500.0000 ] noreverse nowriteback
+	f(x) = A*exp(-x/tau)
+	A = 1
+	tau = 1
+	fit f(x) '$path' u 1:3 via A, tau 
+	set print "fit.txt" append
+	print  $i ,"\t", A, "\t", tau
+
+EOF
+gnuplot fit.gnu
+done
+rm fit.gnu
+cat <<EOF > tau.gnu
+#!/bin/bash
+set term png
+set output 'Results/tau.png'
+set title 'AutoCorrelation Time(N=$N)
+set ylabel '{/Symbol t}'
+set xlabel 'T'
+
+plot 'fit.txt' u 1:3 w lp pt 7 lt 1  notitle
+EOF
+
+gnuplot tau.gnu
+
+rm tau.gnu
+
+
+

@@ -3,3 +3,6 @@ Update the input file 'hinput' then compile and run as:
 g++ heisenberg.cpp -Wall -lm -std=c++11 -fopenmp -w -o heisenberg
 ./heisenberg
 
+To compile and run the AutoCorrelation, update the 'aucf.in' file then:
+g++ aucf.cpp -Wall -lfftw3 -lm -fopenmp -o aucf
+./aucf
