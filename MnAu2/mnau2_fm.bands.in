@@ -1,5 +1,5 @@
  &control
-    calculation = 'scf',
+    calculation = 'bands',
     pseudo_dir = '../pseudo',
     outdir='../temp'
     prefix='mnau2',
@@ -10,6 +10,7 @@
     ntyp= 3,
     ecutwfc = 60.0, ecutrho = 800.0,
     occupations='smearing', smearing='mv', degauss=0.02,
+    nbnd=10
     nspin=2, 
     starting_magnetization(1)= 0.8,
  /
@@ -28,5 +29,13 @@ ATOMIC_POSITIONS crystal
 Mn      0.000000000         0.000000000         0.000000000
 Au     0.339999944         0.339999944         0.679999888
 Au1     0.659999907         0.659999907         0.319999963
-K_POINTS automatic
-8 8 4 0 0 0
+
+K_POINTS {crystal_b}
+6
+  0.50  0.25  0.75  30 !W
+  0.00  0.00  0.00  30 !G
+  0.50  0.00  0.50  30 !X
+  0.50  0.25  0.75  30 !W
+  0.50  0.50  0.50  30 !L
+  0.00  0.00  0.00  30 !G
+

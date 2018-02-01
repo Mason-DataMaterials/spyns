@@ -1,0 +1,6 @@
+ &BANDS
+    outdir='../temp '
+    prefix='mnau2'
+    filband='results_MnAu2_fm/mnau2_fm-bands.dat'
+ /
+

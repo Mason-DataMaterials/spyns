@@ -1,7 +1,7 @@
  &control
     calculation = 'scf',
-    pseudo_dir = './pseudo',
-    outdir='./temp'
+    pseudo_dir = '../pseudo',
+    outdir='../temp'
     prefix='mnau2',
  /
  &system
@@ -29,4 +29,4 @@ Mn      0.000000000         0.000000000         0.000000000
 Au     0.339999944         0.339999944         0.679999888
 Au1     0.659999907         0.659999907         0.319999963
 K_POINTS automatic
-16 16 8 0 0 0
+8 8 4 0 0 0

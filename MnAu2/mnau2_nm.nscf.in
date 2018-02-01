@@ -1,5 +1,5 @@
  &control
-    calculation = 'scf',
+    calculation = 'nscf',
     pseudo_dir = '../pseudo',
     outdir='../temp'
     prefix='mnau2',
@@ -11,7 +11,7 @@
     ecutwfc = 60.0, ecutrho = 800.0,
     occupations='smearing', smearing='mv', degauss=0.02,
     nspin=2, 
-    starting_magnetization(1)= 0.8,
+    starting_magnetization(1)= 0.0,
  /
  &electrons
     mixing_beta = 0.3 
@@ -29,4 +29,4 @@ Mn      0.000000000         0.000000000         0.000000000
 Au     0.339999944         0.339999944         0.679999888
 Au1     0.659999907         0.659999907         0.319999963
 K_POINTS automatic
-8 8 4 0 0 0
+16 16 8 0 0 0

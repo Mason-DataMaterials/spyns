@@ -1,7 +1,23 @@
+#!/bin/bash
+
+temp='../temp'
+pseudo='../pseudo'
+results='results_MnAu2_nm'
+
+if [ ! -d $results ]; then
+   mkdir  $results
+fi
+if [ ! -d $temp ]; then
+   mkdir  $temp
+fi
+rm -rf $temp/*
+
+# self-consistent calculation
+cat > mnau2_nm.scf.in << EOF
  &control
     calculation = 'scf',
-    pseudo_dir = '../pseudo',
-    outdir='../temp'
+    pseudo_dir = '$pseudo',
+    outdir='$temp'
     prefix='mnau2',
  /
  &system
@@ -11,7 +27,7 @@
     ecutwfc = 60.0, ecutrho = 800.0,
     occupations='smearing', smearing='mv', degauss=0.02,
     nspin=2, 
-    starting_magnetization(1)= 0.8,
+    starting_magnetization(1)= 0.0,
  /
  &electrons
     mixing_beta = 0.3 
@@ -30,3 +46,9 @@ Au     0.339999944         0.339999944         0.679999888
 Au1     0.659999907         0.659999907         0.319999963
 K_POINTS automatic
 8 8 4 0 0 0
+EOF
+
+pw.x < mnau2_nm.scf.in  > $results/mnau2.scf.out
+
+./run_MnAu2_nm-nscf
+./run_MnAu2_nm-bands

@@ -1,5 +1,5 @@
 &DOS
-    outdir='./temp'
+    outdir='../temp'
     prefix='mnau2'
     fildos='results_MnAu2_nm/mnau2.dos'
     degauss = 0.007d0,
