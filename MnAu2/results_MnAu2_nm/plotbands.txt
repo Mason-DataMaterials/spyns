@@ -1,9 +1,0 @@
-Reading   10 bands at    151 k-points
-Range:   22.1870  104.8140eV  (Emin, Emax)
- 
-high-symmetry point:  0.5000 0.2500 0.8657   x coordinate   0.0000
-high-symmetry point:  0.0000 0.0000 0.0000   x coordinate   1.0305
-high-symmetry point:  0.5000 0.0000 0.5771   x coordinate   1.7941
-high-symmetry point:  0.5000 0.2500 0.8657   x coordinate   2.1759
-high-symmetry point:  0.5000 0.5000 0.7695   x coordinate   2.4438
-high-symmetry point:  0.0000 0.0000 0.0000   x coordinate   3.4889
