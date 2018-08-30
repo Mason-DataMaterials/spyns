@@ -1,0 +1,18 @@
+QE:
+g     total energy              =    -222.16750131 Ry
+a     total energy              =    -222.09464546 Ry
+f     total energy              =    -222.06793449 Ry
+n     total energy              =    -222.06921053 Ry
+
+
+nn:
+NM    	4	0	0
+FM    	4	8	6
+AFM_a 	4	-8	6
+AFM_g 	4	0	-2
+
+
+fit:
+J = [ 4.17358906e-04,  2.69410422e-03 ] Ry
+
+J = [ 5.67845926e-03,  3.66551686e-02 ] eV
