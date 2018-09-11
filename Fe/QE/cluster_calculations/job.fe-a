@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH -J fe-a
+#SBATCH -o /scratch/ssilayi/spyns/Fe/QE/log.fe-a
+#SBATCH -e /scratch/ssilayi/spyns/Fe/QE/fe-a.err
+#SBATCH --mail-user=ssilayi@gmu.edu
+#SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE,TIMELIMIT_80
+#SBATCH --qos=normal
+#SBATCH --partition=all-LoPri
+#SBATCH --mem=8000
+#SBATCH --time=5-00:00:00
+##SBATCH --nodes=1
+##SBATCH --ntasks-per-node=1
+
+
+
+##. /etc/profile
+
+#module load open64/4.5.2.1
+#module load mvapich2/open64/64/2.2b
+module load openmpi/open64/64/1.10.1
+module load intel-mpi/64/5.1.2/150
+module load qe/6.3.0
+
+# Run the executable.  Note the -np option is required 
+pw.x  < fe_a.scf.in > results_Fe_a/fe_a.scf.out
+

@@ -1,31 +1,11 @@
-#!/bin/sh
-####################################################################
-#
-# output in results_Fe_nm/
-#
-
-temp=./tmp
-pseudo=.
-bin=$HOME/QE/bin
-
-if [ ! -d results_Fe_nm ]; then
-   mkdir  results_Fe_nm
-fi
-if [ ! -d $temp ]; then
-   mkdir  $temp
-fi
-rm -rf $temp/*
-
-# self-consistent calculation
-cat > fe_nm.scf.in << EOF
  &control
-    pseudo_dir = '$pseudo',
-    outdir='$temp'
-    prefix='fenm',
+    pseudo_dir = '.',
+    outdir='./tmp'
+    prefix='fe_nm',
  /
  &system
     ibrav=  0, nat=  4, ntyp= 1,
-    ecutwfc = 50.0, ecutrho = 500.0,
+    ecutwfc = 30.0, ecutrho = 300.0,
     occupations='smearing', smearing='mv', degauss=0.02,
     nspin=2, 
     nbnd = 32,
@@ -47,7 +27,3 @@ ATOMIC_POSITIONS crystal
  Fe   1.00  0.50  0.50
 K_POINTS automatic
 16 16 16 0 0 0
-EOF
-$bin/pw.x < fe_nm.scf.in  > results_Fe_nm/fe_nm.scf.out
-
-

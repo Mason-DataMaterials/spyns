@@ -1,12 +1,12 @@
 #!/bin/sh
 ####################################################################
 #
-# output in results_Fe_nm/
+# output in results_Fe_afm1/
 #
 
 temp=./tmp
 pseudo=.
-bin=$HOME/QE/bin
+#bin=$HOME/qe-6.1/bin
 
 if [ ! -d results_Fe_nm ]; then
    mkdir  results_Fe_nm
@@ -21,14 +21,14 @@ cat > fe_nm.scf.in << EOF
  &control
     pseudo_dir = '$pseudo',
     outdir='$temp'
-    prefix='fenm',
+    prefix='fe_nm',
  /
  &system
     ibrav=  0, nat=  4, ntyp= 1,
-    ecutwfc = 50.0, ecutrho = 500.0,
+    ecutwfc = 30.0, ecutrho = 300.0,
     occupations='smearing', smearing='mv', degauss=0.02,
     nspin=2, 
-    nbnd = 32,
+    nbnd = 100,
     starting_magnetization(1)= 0,
  /
  &electrons
@@ -48,6 +48,5 @@ ATOMIC_POSITIONS crystal
 K_POINTS automatic
 16 16 16 0 0 0
 EOF
-$bin/pw.x < fe_nm.scf.in  > results_Fe_nm/fe_nm.scf.out
 
 
