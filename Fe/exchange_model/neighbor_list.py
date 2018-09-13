@@ -19,9 +19,9 @@ def neighbor_list(
     out to a distance ``r``.
 
     :param cell_structure: A pymatgen ``Structure`` object.
-    :param N: number of sites on one side of box for NxNxN total sites count
+    :param N: number of translations in one direction for 4XNxNxN total sites count
     :param r: Radius of sphere.
-    :return: number of sites, number of n_th neighbors for each site depending on r and 
+    :return: total number of sites, number of n_th neighbors for each site depending on r and 
              numpy array of neighbors for each site sorted by index and distance.
              
     """
@@ -49,6 +49,6 @@ def neighbor_list(
     neighbor_count.sort(order='i', axis=1)
     neighbor_count = neighbor_count.flatten()['v'].tolist()
     
-    
-    return N*N*N, neighbor_count, neighbor_indices
+    n_sites = 4*N*N*N    
+    return n_sites, neighbor_count, neighbor_indices
     
