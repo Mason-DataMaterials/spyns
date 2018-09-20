@@ -1,0 +1,14 @@
+#!/bin/bash
+N=500
+#mkdir -p Results
+#mkdir -p aucf_files 
+for i in $(seq 500 100 1400)
+do 
+      mv ../$i/aucf.out aucf_files/$i 
+      grep $i ../$i/data_$N.txt >> data.txt	
+done
+
+gnuplot isingplot_r.gnu
+gnuplot isingplot_l.gnu
+gnuplot isingplot.gnu
+

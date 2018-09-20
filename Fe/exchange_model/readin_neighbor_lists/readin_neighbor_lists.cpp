@@ -14,12 +14,18 @@ int main () {
   
   int N;
   int num_1st_nn,num_2nd_nn;
+  double * num_nn;
+  
+  num_nn = new double * [2];
   
   if (infile.is_open())
   {
    
       infile>>N;
       infile>>num_1st_nn>>num_2nd_nn;
+      
+      num_nn[0] = num_1st_nn;
+      num_nn[1] = num_2nd_nn;
       
       //populate neighbor lists
       double **first_nn = new double * [N];
