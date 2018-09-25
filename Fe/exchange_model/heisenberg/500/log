@@ -1,7 +1,14 @@
-mkdir: cannot create directory ‘700’: File exists
-mkdir: cannot create directory ‘800’: File exists
-mkdir: cannot create directory ‘900’: File exists
-mkdir: cannot create directory ‘1000’: File exists
-mkdir: cannot create directory ‘1100’: File exists
-mkdir: cannot create directory ‘1200’: File exists
-mkdir: cannot create directory ‘1300’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+rm: cannot remove 'm_snap.out': No such file or directory
+rm: cannot remove 'data_500.txt': No such file or directory
+rm: cannot remove 'm_snap.out': No such file or directory
+rm: cannot remove 'data_500.txt': No such file or directory
+rm: cannot remove 'm_snap.out': No such file or directory
+rm: cannot remove 'data_500.txt': No such file or directory
+rm: cannot remove 'm_snap.out': No such file or directory
+rm: cannot remove 'data_500.txt': No such file or directory
+rm: cannot remove 'm_snap.out': No such file or directory
+rm: cannot remove 'data_500.txt': No such file or directory
+rm: cannot remove 'm_snap.out': No such file or directory
+rm: cannot remove 'data_500.txt': No such file or directory
+rm: cannot remove 'm_snap.out': No such file or directory

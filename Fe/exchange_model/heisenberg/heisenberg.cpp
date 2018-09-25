@@ -650,6 +650,7 @@ int main(int argc, char *argv[]){
 */
     int cc = 0;
     ofstream afile; afile.open("aucf.out");
+    ofstream mfile; mfile.open("m_snap.out");
 
     //Production steps
     for (int step = 0; step < MCSteps; step++)
@@ -668,14 +669,28 @@ int main(int argc, char *argv[]){
         cout << step << "\t" <<M <<"\t" << MAvg << "\t" << HAvg << "\n";
 
         //sample every 'freq' steps
-        if (step % freq ==0 )
+        if (step % freq == 0 )
         {              
             //save snapshot to aucf.out
             afile << cc <<"\t" << M <<"\t" << H << "\n";
 
             cc+=1;
 
+        }	//end if freq
+
+        if (step % 1000 == 0 )
+        {              
+
+	    for (int i = 0; i < N; i++ ){
+
+		 mfile <<  i       << "\t" << si[i][0] << "\t" << si[i][1] << "\t" 
+		       << si[i][2] << "\t" << si[i][3] << "\t" << si[i][4] << "\n"; 
+
+	    }
+
         }                                                   //end if freq
+
+
 
     }                                                       //end loop over MCSteps
 
@@ -689,6 +704,7 @@ int main(int argc, char *argv[]){
     save_data(N,MCSteps,data);
 
     afile.close();    
+    mfile.close();    
 
     free(data);
     free(si);
