@@ -1,0 +1,21 @@
+#!/bin/bash
+N=2048
+file="hinput"
+for i in $(seq 700 100 1300)
+do
+  mkdir $i
+  cd $i/.
+  cp ../{heisenberg,hinput,neighbor_lists.txt} .
+  
+  sed -i "1 c\temperature = $i" hinput
+  sed -i "2 c\external_field(h) = 0.0" hinput
+  sed -i "3 c\exchange_constant(1st_nn) = 7.52373031e-03" hinput
+  sed -i "4 c\exchange_constant(2nd_nn) = 2.55273958e-03" hinput
+  sed -i "5 c\iterations = 50000" hinput  
+  sed -i "6 c\sampling_frequency = 50" hinput
+
+  ./heisenberg>&log.$i&
+
+  cd ../  
+done
+

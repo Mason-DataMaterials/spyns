@@ -11,11 +11,9 @@ do
   
   sed -i "1 c\temperature = $i" hinput
   sed -i "2 c\external_field(h) = 0.0" hinput
-#  sed -i "3 c\exchange_constant(1st_nn) =  -0.000962834423306" hinput
-#  sed -i "4 c\exchange_constant(2nd_nn) =  -0.00100693370987 " hinput
-  sed -i "3 c\exchange_constant(1st_nn) =  -0.000517232014177008" hinput
-  sed -i "4 c\exchange_constant(2nd_nn) =  -2.4647770587336e-05" hinput 
-  sed -i "5 c\iterations = 50000" hinput  
+  sed -i "3 c\exchange_constant(1st_nn) =  -0.000962834423306" hinput
+  sed -i "4 c\exchange_constant(2nd_nn) =  -0.00100693370987 " hinput
+  sed -i "5 c\iterations = 150000" hinput  
   sed -i "6 c\sampling_frequency = 50" hinput
 
   ./heisenberg>&log.$i&

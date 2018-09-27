@@ -1,0 +1,20 @@
+mkdir: cannot create directory ‘500’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+mkdir: cannot create directory ‘600’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+mkdir: cannot create directory ‘700’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+mkdir: cannot create directory ‘800’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+mkdir: cannot create directory ‘900’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+mkdir: cannot create directory ‘1000’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+mkdir: cannot create directory ‘1100’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+mkdir: cannot create directory ‘1200’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+mkdir: cannot create directory ‘1300’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory
+mkdir: cannot create directory ‘1400’: File exists
+rm: cannot remove 'data_500.txt': No such file or directory

@@ -1,7 +1,0 @@
-temperature = 1300
-external_field(h) = 0.0
-exchange_constant(1st_nn) =  -0.000517232014177008
-exchange_constant(2nd_nn) =  -2.4647770587336e-05
-iterations = 50000
-sampling_frequency = 50
-
