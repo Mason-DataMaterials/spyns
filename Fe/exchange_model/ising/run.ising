@@ -1,0 +1,19 @@
+#!/bin/bash
+i=2048
+mkdir -p snapshots_$i/
+mkdir -p data_$i/
+./ising 
+mv conf_* snapshots_$i/.
+mv data_$i.txt  data_$i/.
+
+
+mkdir -p Results
+
+rm -r Results/*
+
+gnuplot isingplot.gnu
+
+mv Results Results_$i
+cp neighbor_lists.txt data_$i/neighbor_lists-$i.txt
+mv *_$i Results_$i/.
+

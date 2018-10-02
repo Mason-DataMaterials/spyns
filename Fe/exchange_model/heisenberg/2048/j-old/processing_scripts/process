@@ -6,7 +6,7 @@ rm -r Results/*
 rm -r aucf_files/*
 rm data.txt
 
-for i in $(seq 500 100 1400)
+for i in $(seq 500 20 1400)
 do 
       mv ../$i/aucf.out aucf_files/$i 
       grep $i ../$i/data_$N.txt >> data.txt	
