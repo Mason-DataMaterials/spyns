@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for i in {0..1400..20}
+do
+
+	mv m_snaps_$i.txt m_$i.txt
+
+done

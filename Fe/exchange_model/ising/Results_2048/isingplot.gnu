@@ -9,7 +9,7 @@ set xlabel "T"
 set key autotitle columnheader
 set title "Magnetization(N=2048)"
 set ylabel "<M>"
-set xrange [0:20]
+set xrange [0:4]
 plot fname u 1:2 w lp pt 7 notitle, "" u 1:2:(sqrt($3)) w errorbars notitle
 
 
@@ -20,7 +20,7 @@ fname='data_2048/data_2048.txt'
 set term png
 set output 'Results/ising_E.png' 
 
-set xrange [0:20]
+set xrange [0:4]
 set xlabel "T"
 set key autotitle columnheader
 set title "Energy(N=2048)"
@@ -33,7 +33,7 @@ fname='data_2048/data_2048.txt'
 set term png
 set output 'Results/ising_X.png' 
 
-set xrange [0:20]
+set xrange [0:4]
 set xlabel "T"
 set key autotitle columnheader
 set title "Susceptibility(N=2048)"
@@ -48,7 +48,7 @@ set output 'Results/ising_Cv.png'
 
 set xlabel "T"
 
-set xrange [0:20]
+set xrange [0:4]
 set key autotitle columnheader
 set title "Heat Capacity(N=2048)"
 
