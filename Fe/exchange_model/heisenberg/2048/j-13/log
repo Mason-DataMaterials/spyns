@@ -1,213 +1,52 @@
-mkdir: cannot create directory ‘0’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘20’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘40’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘60’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘80’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘100’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘120’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘140’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘160’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘180’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘200’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘220’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘240’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘260’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘280’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘300’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘320’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘340’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘360’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘380’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘400’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘420’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘440’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘460’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘480’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘500’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘520’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘540’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘560’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘580’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘600’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘620’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘640’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘660’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘680’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘700’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘720’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘740’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘760’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘780’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘800’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘820’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘840’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘860’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘880’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘900’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘920’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘940’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘960’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘980’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1000’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1020’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1040’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1060’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1080’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1100’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1120’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1140’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1160’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1180’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1200’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1220’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1240’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1260’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1280’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1300’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1320’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1340’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1360’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1380’: File exists
-rm: cannot remove ‘data_2048.txt’: No such file or directory
-rm: cannot remove ‘m_snap.out’: No such file or directory
-mkdir: cannot create directory ‘1400’: File exists
 rm: cannot remove ‘data_2048.txt’: No such file or directory
 rm: cannot remove ‘m_snap.out’: No such file or directory

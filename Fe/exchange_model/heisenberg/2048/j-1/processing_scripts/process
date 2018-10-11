@@ -1,0 +1,21 @@
+#!/bin/bash
+N=2048
+mkdir -p Results
+mkdir -p aucf_files 
+mkdir -p m_files 
+rm -r Results/*
+rm -r aucf_files/*
+rm -r m_files/*
+rm data.txt
+
+for i in $(seq 0 10 500)
+do 
+      mv ../$i/aucf.out aucf_files/$i 
+      mv ../$i/m_snap.out m_files/m_snaps_$i.txt 
+      grep $i ../$i/data_$N.txt >> data.txt	
+done
+
+#gnuplot isingplot_r.gnu
+#gnuplot isingplot_l.gnu
+gnuplot isingplot.gnu
+

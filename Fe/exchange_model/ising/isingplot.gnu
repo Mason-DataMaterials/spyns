@@ -1,7 +1,7 @@
 #!/bin/bash
 
+fname="data_400.txt" 
 #M
-fname='data_2048/data_500.txt'
 set term png
 set output 'Results/ising_M.png' 
 
@@ -15,8 +15,6 @@ plot fname u 1:2 w lp pt 7 notitle, "" u 1:2:(sqrt($3)) w errorbars notitle
 
 
 #E
-reset
-fname='data_2048/data_500.txt'
 set term png
 set output 'Results/ising_E.png' 
 
@@ -28,8 +26,6 @@ set ylabel "<E>"
 plot fname u 1:6 w lp pt 7 notitle, "" u 1:6:(sqrt($7)) w errorbars notitle
 
 #X
-reset
-fname='data_2048/data_500.txt'
 set term png
 set output 'Results/ising_X.png' 
 
@@ -41,8 +37,6 @@ set ylabel "{/Symbol C}"
 plot fname u 1:9 w lp pt 7 notitle
 
 #Cv
-reset
-fname='data_2048/data_500.txt'
 set term png
 set output 'Results/ising_Cv.png' 
 

@@ -474,7 +474,7 @@ int main(int argc, char *argv[]){
     
     
     
-    for (T = 1.0; T <=20.0; T+=0.5)
+    for (T = 1.0; T <=20.0; T+=0.25)
     {
         
         for (int i = 0; i < (eqSteps+MCSteps); i++)

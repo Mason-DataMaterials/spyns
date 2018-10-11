@@ -1,0 +1,21 @@
+#!/bin/bash
+cd j-13/
+for i in $(seq 0 50 1400)
+do
+  	
+  cd $i/
+    head -n 1 log.$i >>../../energies.13 
+  cd ../ 
+done
+cd ../ 
+
+cd j-1/
+for i in $(seq 0 50 1400)
+do
+  	
+  cd $i/
+    head -n 1 log.$i >>../../energies.1 
+  cd ../
+done
+
+cd ../  

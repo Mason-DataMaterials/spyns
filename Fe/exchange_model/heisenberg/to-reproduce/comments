@@ -1,0 +1,17 @@
+Monte Carlo simulation of fcc Heisenberg antiferromagnet with nearest‐ and next‐nearest‐neighbor interactions:
+nearest neighbors: 2
+j-values: j_2 = 0.1j_1 (arbitrary units)
+
+T_c = 0.47
+
+Spin Waves in Paramagnetic bcc Iron: Spin Dynamics Simulations:
+nearest neighbors: 4
+
+j-values (meV): j_1 = 18.2
+                j_2 = 10.3
+                j_3 = -0.813
+                j_4 = -1.20
+
+T_c = 919 K
+
+L = 32, 64 (L*L*L)
