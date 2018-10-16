@@ -1,0 +1,10 @@
+#!/bin/ksh
+
+for i in $(seq 2 0.1 10 )
+do
+if [ $i -ge 2 ] && [ $i  -lt 5 ] 
+then 
+    echo $i
+fi
+done
+

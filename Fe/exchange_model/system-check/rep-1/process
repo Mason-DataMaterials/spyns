@@ -1,0 +1,25 @@
+#!/bin/ksh
+N=2048
+
+
+
+#!/bin/bash
+N=2048
+mkdir -p Results
+mkdir -p a_files 
+mkdir -p m_files 
+rm -r Results/*
+rm -r aucf_files/*
+rm -r m_files/*
+rm data.txt
+
+for i in $(seq 0.2 0.1 10)
+do 
+      mv $i/aucf.out a_files/$i 
+      mv $i/con*.txt  m_files/m.$i 
+      grep $i $i/data_$N.txt >> data.txt      
+done
+
+gnuplot isingplot.gnu
+
+

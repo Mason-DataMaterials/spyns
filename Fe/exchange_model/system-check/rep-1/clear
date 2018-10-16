@@ -1,0 +1,10 @@
+#!/bin/ksh
+N=2048
+
+for i in $(seq 0.2 0.1 10)
+do 
+      rm -r $i 
+done
+
+
+

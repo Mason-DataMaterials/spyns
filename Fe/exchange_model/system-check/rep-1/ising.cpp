@@ -100,7 +100,7 @@ double Energy( int N, int * si, int * num_nn, int ** first_nn, int ** second_nn,
     for (int i = 0; i < N; i++)
     {         
         neighbors(N, si, num_nn, first_nn[i], second_nn[i], sj);
-        H = H + ( -(si[i]*(J[0]*sj[0] + J[1]*sj[1])) - h*si[i] );
+        H = H + ( (si[i]*(J[0]*sj[0] + J[1]*sj[1])) + h*si[i] );
     }
     
     
@@ -474,8 +474,8 @@ int main(int argc, char *argv[]){
     
     
     
-    for (T = 0.1; T <=10.0; T+=0.2)
-    {
+//    for (T = 0.1; T <=10.0; T+=0.2)
+//    {
         
         for (int i = 0; i < (eqSteps+MCSteps); i++)
         {   
@@ -541,7 +541,7 @@ int main(int argc, char *argv[]){
         
         
         
-    }
+//   }
     
     
     free (si);

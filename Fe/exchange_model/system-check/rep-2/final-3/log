@@ -1,0 +1,49 @@
+rm: cannot remove ‘Results/*’: No such file or directory
+rm: cannot remove ‘aucf_files/*’: No such file or directory
+rm: cannot remove ‘m_files/*’: No such file or directory
+rm: cannot remove ‘data.txt’: No such file or directory
+mv: cannot stat ‘../50/aucf.out’: No such file or directory
+mv: cannot stat ‘../50/m_snap.out’: No such file or directory
+grep: ../50/data_500.txt: No such file or directory
+mv: cannot stat ‘../150/aucf.out’: No such file or directory
+mv: cannot stat ‘../150/m_snap.out’: No such file or directory
+grep: ../150/data_500.txt: No such file or directory
+mv: cannot stat ‘../250/aucf.out’: No such file or directory
+mv: cannot stat ‘../250/m_snap.out’: No such file or directory
+grep: ../250/data_500.txt: No such file or directory
+mv: cannot stat ‘../350/aucf.out’: No such file or directory
+mv: cannot stat ‘../350/m_snap.out’: No such file or directory
+grep: ../350/data_500.txt: No such file or directory
+mv: cannot stat ‘../450/aucf.out’: No such file or directory
+mv: cannot stat ‘../450/m_snap.out’: No such file or directory
+grep: ../450/data_500.txt: No such file or directory
+mv: cannot stat ‘../550/aucf.out’: No such file or directory
+mv: cannot stat ‘../550/m_snap.out’: No such file or directory
+grep: ../550/data_500.txt: No such file or directory
+mv: cannot stat ‘../650/aucf.out’: No such file or directory
+mv: cannot stat ‘../650/m_snap.out’: No such file or directory
+grep: ../650/data_500.txt: No such file or directory
+mv: cannot stat ‘../750/aucf.out’: No such file or directory
+mv: cannot stat ‘../750/m_snap.out’: No such file or directory
+grep: ../750/data_500.txt: No such file or directory
+mv: cannot stat ‘../850/aucf.out’: No such file or directory
+mv: cannot stat ‘../850/m_snap.out’: No such file or directory
+grep: ../850/data_500.txt: No such file or directory
+mv: cannot stat ‘../950/aucf.out’: No such file or directory
+mv: cannot stat ‘../950/m_snap.out’: No such file or directory
+grep: ../950/data_500.txt: No such file or directory
+mv: cannot stat ‘../1050/aucf.out’: No such file or directory
+mv: cannot stat ‘../1050/m_snap.out’: No such file or directory
+grep: ../1050/data_500.txt: No such file or directory
+mv: cannot stat ‘../1150/aucf.out’: No such file or directory
+mv: cannot stat ‘../1150/m_snap.out’: No such file or directory
+grep: ../1150/data_500.txt: No such file or directory
+mv: cannot stat ‘../1250/aucf.out’: No such file or directory
+mv: cannot stat ‘../1250/m_snap.out’: No such file or directory
+grep: ../1250/data_500.txt: No such file or directory
+mv: cannot stat ‘../1350/aucf.out’: No such file or directory
+mv: cannot stat ‘../1350/m_snap.out’: No such file or directory
+grep: ../1350/data_500.txt: No such file or directory
+mv: cannot stat ‘../1400/aucf.out’: No such file or directory
+mv: cannot stat ‘../1400/m_snap.out’: No such file or directory
+grep: ../1400/data_500.txt: No such file or directory
