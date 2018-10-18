@@ -1,53 +1,59 @@
 #!/bin/bash
 
-fname="data_2048.txt" 
 #M
+fname='data.txt'
 set term png
-set output 'Results/ising_M.png' 
+set output 'Results/heisenberg_M.png' 
 
 set xlabel "T"
 set key autotitle columnheader
-set title "Magnetization(N=2048)"
+set title "Magnetization(N=4000)"
 set ylabel "<M>"
-set xrange [0:10]
+set xrange [0:1400]
 plot fname u 1:2 w lp pt 7 notitle, "" u 1:2:(sqrt($3)) w errorbars notitle
 
 
 
 #E
+reset
+fname='data.txt'
 set term png
-set output 'Results/ising_E.png' 
+set output 'Results/heisenberg_E.png' 
 
-set xrange [0:10]
+set xrange [0:1400]
 set xlabel "T"
 set key autotitle columnheader
-set title "Energy(N=2048)"
+set title "Energy(N=4000)"
 set ylabel "<E>" 
 plot fname u 1:6 w lp pt 7 notitle, "" u 1:6:(sqrt($7)) w errorbars notitle
 
 #X
+reset
+fname='data.txt'
 set term png
-set output 'Results/ising_X.png' 
+set output 'Results/heisenberg_X.png' 
 
-set xrange [0:10]
+set xrange [0:1400]
 set xlabel "T"
 set key autotitle columnheader
-set title "Susceptibility(N=2048)"
+set title "Susceptibility(N=4000)"
 set ylabel "{/Symbol C}" 
 plot fname u 1:9 w lp pt 7 notitle
 
 #Cv
+reset
+fname='data.txt'
 set term png
-set output 'Results/ising_Cv.png' 
+set output 'Results/heisenberg_Cv.png' 
 
 set xlabel "T"
 
-set xrange [0:10]
+set xrange [0:1400]
 set key autotitle columnheader
-set title "Heat Capacity(N=2048)"
+set title "Heat Capacity(N=4000)"
 
 set ylabel "C_v" 
-plot fname u 1:($10) w lp pt 7 notitle
+plot fname u 1:(-$10) w lp pt 7 notitle
 
 
 

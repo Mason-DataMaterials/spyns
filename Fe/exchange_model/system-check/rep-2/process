@@ -1,5 +1,5 @@
 #!/bin/bash
-N=2048
+N=4000
 mkdir -p Results
 mkdir -p aucf_files 
 mkdir -p m_files 
@@ -18,4 +18,4 @@ done
 #gnuplot isingplot_r.gnu
 #gnuplot isingplot_l.gnu
 gnuplot isingplot.gnu
-
+mv Results plots
