@@ -1,9 +1,0 @@
-
-#!/bin/bash
-N=900
-for i in $(seq 0.05 0.25 10.0)
-do
-  rm -r $i 
-done
-
-

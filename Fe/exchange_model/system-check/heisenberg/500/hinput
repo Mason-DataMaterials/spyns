@@ -1,0 +1,7 @@
+temperature = 0.05 0.2 10.0
+external_field(h) = 0.0
+exchange_constant(1st_nn) =  2.50
+exchange_constant(2nd_nn) =  0.25
+iterations = 200000
+sampling_frequency = 20000
+
