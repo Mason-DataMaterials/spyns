@@ -1,0 +1,30 @@
+#!/bin/bash
+N=4000
+run=0
+mkdir -p aucf
+for i in $(seq 400 50 1300)
+do
+echo "Running for T = $i ... "
+ 
+cat > hinput << EOF  
+temperature = $i 
+external_field(h) = 0.0 
+exchange_constant(1st_nn) = 0.0130 
+exchange_constant(2nd_nn) = 0.0013 
+iterations =  8000000   
+sampling_frequency = 40000 
+run = $run 
+EOF
+
+./heisenberg
+
+cp final_config final_config.$run
+mv aucf*.out aucf
+
+run=$(( $run + 1 ))
+echo "Done for T = $i "
+done
+
+
+
+

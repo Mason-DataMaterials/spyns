@@ -1,0 +1,86 @@
+#!/bin/bash
+N=1024
+path="."
+
+for i in $(seq 00 50 1400)
+do
+       if [ -e $path/$i ]; then
+
+	       grep $i $path/$i/data_$N.txt >> data.txt	
+       fi
+
+done
+
+
+
+mkdir -p Plots/
+
+lt=00
+ut=1400
+cat > plots.gnu << EOF
+#!/bin/bash
+
+#M
+fname='data.txt'
+set term png
+set output 'Plots/heisenberg_M.png' 
+
+set xlabel "T"
+set key autotitle columnheader
+set title "Magnetization(N=$N)"
+set ylabel "<M>"
+set xrange [$lt:$ut]
+plot fname u 1:2 w lp pt 7 notitle, "" u 1:2:(sqrt(\$3)) w errorbars notitle
+
+
+
+#E
+reset
+fname='data.txt'
+set term png
+set output 'Plots/heisenberg_E.png' 
+
+set xrange [$lt:$ut]
+set xlabel "T"
+set key autotitle columnheader
+set title "Energy(N=$N)"
+set ylabel "<E>" 
+plot fname u 1:6 w lp pt 7 notitle, "" u 1:6:(sqrt(\$7)) w errorbars notitle
+
+#X
+reset
+fname='data.txt'
+set term png
+set output 'Plots/heisenberg_X.png' 
+
+set xrange [$lt:$ut]
+set xlabel "T"
+set key autotitle columnheader
+set title "Susceptibility(N=$N)"
+set ylabel "{/Symbol C}" 
+plot fname u 1:9 w lp pt 7 notitle
+
+#Cv
+reset
+fname='data.txt'
+set term png
+set output 'Plots/heisenberg_Cv.png' 
+
+set xlabel "T"
+
+set xrange [$lt:$ut]
+set key autotitle columnheader
+set title "Heat Capacity(N=$N)"
+
+set ylabel "C_v" 
+plot fname u 1:10 w lp pt 7 notitle
+
+
+
+
+
+
+
+EOF
+gnuplot plots.gnu
+
