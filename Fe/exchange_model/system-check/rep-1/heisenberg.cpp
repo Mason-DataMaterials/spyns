@@ -22,47 +22,85 @@ using namespace std;
  */
 random_device rd;
 mt19937 engine(rd());
-uniform_real_distribution<double> dist(0, 1);
+uniform_real_distribution<double> dist(0.0, 1.0);
 
 
 
-/* initialize(N, si)
- * Initializes sites with randomized spins in the x, y and z directions
- * within a box.
+/* initialize(N, L, a, si)
+ * calculates the box side length and initializes
+ * particles arranged in a bcc lattice structure
+ * with randomized spins in the x, y and z directions
+ * within a box of side L.
  *
  * takes in: N - number of particles
+ *           L - length of box side
+ *           a - lattice constant
  *           si - coordinates and x,y,z spin values 
  *                                for each particle
  *
  */
 
 
-void initialize(int N, double ** si )
-{
-    for (int n = 0; n < N; n++){
-
+void initialize(int N, double ** si ){
+    
+    
+    
+    
+    for (int n = 0; n < N; n++)
+    {
+    
+        si[n][0] = 0.0;
+        si[n][1] = 0.0;
+        si[n][2] = 0.0;
+        
         //(Sx, Sy, Sz) = (sin(theta)cos(phi), sin(theta)sin(phi), cos(theta))
-        double theta = 1.0/cos(1.0-2.0 * (double) dist(engine));
-        double phi = M_PI*2.0* (double)dist(engine);
-
+        double theta = acos( 1.0 - 2.0 * dist(engine) );
+        double phi = 2.0 * M_PI * dist(engine);
+        
+/*        
+        //limit theta value
+        double pt = dist (engine);
+        if (pt > 0.5)
+        {
+            theta = 0.0;
+        }else 
+        {
+            theta = M_PI;
+        }
+*/	
         //theta
-        si[n][0] = theta;
-
+        si[n][3] = theta;
+        
         //phi
-        si[n][1] = phi;
-
+        si[n][4] = phi;
+        
+        
         //Sx
-        si[n][2] = sin( si[n][0] )*cos( si[n][1] );
+        si[n][5] = sin( si[n][3] )*cos( si[n][4] );
         //Sy
-        si[n][3] = sin( si[n][0] )*sin( si[n][1] );
+        si[n][6] = sin( si[n][3] )*sin( si[n][4] );
         //Sz
-        si[n][4] = cos( si[n][0] );
-
-      }
-      
-      return;
+        si[n][7] = cos( si[n][3] );
+                        
+                        
+        
+    }
+    
+    /*
+     *    cout << N << "\n";
+     *    cout << " " << "\n";
+     *    
+     *    for (int i = 0; i< N; i++){
+     *    
+     *        cout << "Fe" << "\t" << si[i][0] << "\t" << si[i][1] << "\t" << si[i][2] << "\t"
+     *                             << si[i][5] << "\t" << si[i][6] << "\t" << si[i][7] << "\n";
 }
-
+*/
+    
+    
+    
+    return;
+}
 
 /* Magnetization(N, si)
  * Calculates total magnetization of the system. 
@@ -83,9 +121,9 @@ double Magnetization(int N, double ** si){
     
     for (int i = 0; i < N; i++)
     {
-        mx = mx + si[i][2];
-        my = my + si[i][3];
-        mz = mz + si[i][4];
+        mx = mx + si[i][5];
+        my = my + si[i][6];
+        mz = mz + si[i][7];
     }
     
     
@@ -100,29 +138,29 @@ double Magnetization(int N, double ** si){
 }
 
 
+
+
 /* neighbors(N, si, point)
  * calculates the sum of spins for the
- * first  and second 
+ * first (nn1 = 8) and second (nn2 = 6) 
  * neighbor sites of a point in 
- * the grid.
+ * the bcc grid.
  * takes in: N - length of one side
  *           si - 3D lattice of spin sites
  *           point - site of interest
  * returns: sj - sum of the spins of neighbors of point
  */
-void neighbors(int N, int point, int xyz, double * sj, 
-               double ** si, 
-               double * num_nn,  double ** first_nn, double ** second_nn)
+void neighbors(int N, int point, int xyz, double * sj, double ** si, double ** first_nn, double ** second_nn)
 {    
     
     
     
-    for (int i =0; i<num_nn[0]; i++){
+    for (int i =0; i<8; i++){
         int index = int (first_nn[point][i]);
         sj[0] += si[index][xyz];
     }
     
-    for (int i =0; i<num_nn[1]; i++){
+    for (int i =0; i<6; i++){
         int index = int (second_nn[point][i]);
         sj[1] += si[index][xyz];
     }
@@ -131,7 +169,7 @@ void neighbors(int N, int point, int xyz, double * sj,
     return;
 }
 
-/* Energy(N, si, num_nn,  first_nn, second_nn, h, J)
+/* Energy(N, si, first_nn, second_nn, h, J)
  * Calculates total energy of the system. 
  * takes in: N - number of particles
  *           si - coordinates and x,y,z spin values 
@@ -144,7 +182,7 @@ void neighbors(int N, int point, int xyz, double * sj,
  */
 
 
-double Energy(int N, double ** si, double * num_nn,  double ** first_nn, double ** second_nn, double h, double * J)
+double Energy(int N, double ** si, double ** first_nn, double ** second_nn, double h, double * J)
 {
     double H  = 0.0;
     
@@ -167,13 +205,13 @@ double Energy(int N, double ** si, double * num_nn,  double ** first_nn, double 
         
         int point = i;
         
-        neighbors(N, point, 2, sj_x, si, num_nn, first_nn, second_nn );
-        neighbors(N, point, 3, sj_y, si, num_nn, first_nn, second_nn );
-        neighbors(N, point, 4, sj_z, si, num_nn, first_nn, second_nn );
+        neighbors(N, point, 5, sj_x, si, first_nn, second_nn );
+        neighbors(N, point, 6, sj_y, si, first_nn, second_nn );
+        neighbors(N, point, 7, sj_z, si, first_nn, second_nn );
         
-        Hi[0] = Hi[0] + ( (si[i][2]*-(J[0]*sj_x[0] + J[1]*sj_x[1]) ) - h*si[i][2] );
-        Hi[1] = Hi[1] + ( (si[i][3]*-(J[0]*sj_y[0] + J[1]*sj_y[1]) ) - h*si[i][3] );
-        Hi[2] = Hi[2] + ( (si[i][4]*-(J[0]*sj_z[0] + J[1]*sj_z[1]) ) - h*si[i][4] );
+        Hi[0] = Hi[0] + ( (si[i][5]*-(J[0]*sj_x[0] + J[1]*sj_x[1]) ) - h*si[i][5] );
+        Hi[1] = Hi[1] + ( (si[i][6]*-(J[0]*sj_y[0] + J[1]*sj_y[1]) ) - h*si[i][6] );
+        Hi[2] = Hi[2] + ( (si[i][7]*-(J[0]*sj_z[0] + J[1]*sj_z[1]) ) - h*si[i][7] );
         
     }
     
@@ -198,7 +236,6 @@ double Energy(int N, double ** si, double * num_nn,  double ** first_nn, double 
 
 double dE_theta (       int N, 
                         double ** si, 
-                        double * num_nn, 
                         double ** first_nn, 
                         double ** second_nn, 
                         double h, 
@@ -216,12 +253,12 @@ double dE_theta (       int N,
     double * sj_z = new double [2];
     sj_z[0] = sj_z[1] = 0;
     
-    neighbors(N, point, 2, sj_x, si, num_nn,  first_nn, second_nn );
-    neighbors(N, point, 3, sj_y, si, num_nn,  first_nn, second_nn );
-    neighbors(N, point, 4, sj_z, si, num_nn,  first_nn, second_nn );
+    neighbors(N, point, 5, sj_x, si, first_nn, second_nn );
+    neighbors(N, point, 6, sj_y, si, first_nn, second_nn );
+    neighbors(N, point, 7, sj_z, si, first_nn, second_nn );
     
-    double theta = si[point][0];
-    double phi   = si[point][1];
+    double theta = si[point][3];
+    double phi   = si[point][4];
     
     
     double sx  = sin(new_theta)*cos(phi) - sin(theta)*cos(phi);
@@ -247,7 +284,6 @@ double dE_theta (       int N,
 
 double dE_phi (         int N, 
                         double ** si, 
-                        double * num_nn, 
                         double ** first_nn, 
                         double ** second_nn, 
                         double h, 
@@ -265,12 +301,12 @@ double dE_phi (         int N,
     double * sj_z = new double [2];
     sj_z[0] = sj_z[1] = 0;
     
-    neighbors(N, point, 2, sj_x, si, num_nn, first_nn, second_nn );
-    neighbors(N, point, 3, sj_y, si, num_nn, first_nn, second_nn );
-    neighbors(N, point, 4, sj_z, si, num_nn, first_nn, second_nn );
+    neighbors(N, point, 5, sj_x, si, first_nn, second_nn );
+    neighbors(N, point, 6, sj_y, si, first_nn, second_nn );
+    neighbors(N, point, 7, sj_z, si, first_nn, second_nn );
     
-    double theta = si[point][0];
-    double phi   = si[point][1];
+    double theta = si[point][3];
+    double phi   = si[point][4];
     
     
     double sx  = sin(theta)*cos(new_phi) - sin(theta)*cos(phi);
@@ -300,8 +336,6 @@ double dE_phi (         int N,
  *  update the energy, H, and magnetization, M, values.
  * takes in: N - length of one side
  *           si - 3D lattice of spin sites
- *           num_nn - array holding number of nth
- *                        nearest neighbors
  *           first_nn - empty array for lists of
  *                        first nearest neighbors
  *           second_nn - empty array for lists of
@@ -314,7 +348,7 @@ double dE_phi (         int N,
  */
 
 
-void MC_move(int N, double ** si,  double * num_nn, double ** first_nn, double ** second_nn, 
+void MC_move(int N, double ** si,  double ** first_nn, double ** second_nn, 
              double h, double *J, double &M, double &H, double T)
 {
     double phi, theta, p;
@@ -331,22 +365,33 @@ void MC_move(int N, double ** si,  double * num_nn, double ** first_nn, double *
             
          
         //theta update, phi constant
-        theta = 1.0/cos(1.0-2.0 * (double)dist(engine));
+        theta = acos( 1.0 - 2.0 * dist(engine));
+/*        
+        //limit theta value
+        double pt = dist (engine);
+        if (pt > 0.5)
+        {
+            theta = 0.0;
+        }else 
+        {
+            theta = M_PI;
+        }
+*/        
         
-        double dE = dE_theta (N, si, num_nn, first_nn, second_nn, h, J, point, theta );
+        double dE = dE_theta (N, si, first_nn, second_nn, h, J, point, theta );
         
         int i = sweep;
         
         if (dE <= 0.0)
         {
             //theta
-            si[i][0] = theta;
+            si[i][3] = theta;
             //Sx
-            si[i][2] = sin(si[i][0])*cos(si[i][1]);
+            si[i][5] = sin(si[i][3])*cos(si[i][4]);
             //Sy
-            si[i][3] = sin(si[i][0])*sin(si[i][1]);
+            si[i][6] = sin(si[i][3])*sin(si[i][4]);
             //Sz
-            si[i][4] = cos(si[i][0]);
+            si[i][7] = cos(si[i][3]);
             
             H = H+dE;
         }
@@ -357,13 +402,13 @@ void MC_move(int N, double ** si,  double * num_nn, double ** first_nn, double *
             if (p <= exp(-dE*beta))
             {
                 
-                si[i][0] = theta;
+                si[i][3] = theta;
                 //Sx
-                si[i][2] = sin(si[i][0])*cos(si[i][1]);
+                si[i][5] = sin(si[i][3])*cos(si[i][4]);
                 //Sy
-                si[i][3] = sin(si[i][0])*sin(si[i][1]);
+                si[i][6] = sin(si[i][3])*sin(si[i][4]);
                 //Sz
-                si[i][4] = cos(si[i][0]);
+                si[i][7] = cos(si[i][3]);
                 
                 H = H+dE;
                 
@@ -374,19 +419,19 @@ void MC_move(int N, double ** si,  double * num_nn, double ** first_nn, double *
         
         
         //phi update, theta constant
-        phi = M_PI*2.0* (double)dist(engine);
-        dE = dE_phi(N, si, num_nn, first_nn, second_nn, h, J, point, phi);
+        phi = 2.0 * M_PI * dist(engine);
+        dE = dE_phi(N, si, first_nn, second_nn, h, J, point, phi);
         
         
         if (dE <= 0.0)
         {
             
             //phi
-            si[i][1] = phi;
+            si[i][4] = phi;
             //Sx
-            si[i][2] = sin(si[i][0])*cos(si[i][1]);
+            si[i][5] = sin(si[i][3])*cos(si[i][4]);
             //Sy
-            si[i][3] = sin(si[i][0])*sin(si[i][1]);
+            si[i][6] = sin(si[i][3])*sin(si[i][4]);
             
         }
         else {
@@ -395,11 +440,11 @@ void MC_move(int N, double ** si,  double * num_nn, double ** first_nn, double *
             if (p < exp(-dE*beta))
             {
                 //phi
-                si[i][1] = phi;
+                si[i][4] = phi;
                 //Sx
-                si[i][2] = sin(si[i][0])*cos(si[i][1]);
+                si[i][5] = sin(si[i][3])*cos(si[i][4]);
                 //Sy
-                si[i][3] = sin(si[i][0])*sin(si[i][1]);
+                si[i][6] = sin(si[i][3])*sin(si[i][4]);
                 
             }
         }//end if for phi
@@ -477,7 +522,7 @@ void save_data(int N, int MCSteps,double * data)
     double X = (beta*MN)*( M2Avg - (MAvg*MAvg));
     
     //Specific Heat
-    double Cv = (beta2/MN)*(H2Avg - (HAvg*HAvg));
+    double Cv = (beta2*MN)*(H2Avg - (HAvg*HAvg));
     
     //write to file
     hfile << T << "\t"
@@ -496,30 +541,24 @@ void save_data(int N, int MCSteps,double * data)
 
 
 int main(int argc, char *argv[]){
-
-    int N;            	                                     //number of atoms 
-    int MCSteps;      	                                     //number of monte carlo moves 
-    int freq;		                                             //sampling frequency
-    double T;  		                                           //simulation temperature
-
+    
+    int N;            	//number of atoms 
+    int MCSteps;      	//number of monte carlo moves 
+    int freq;		//sampling frequency
+    double T;  		//simulation temperature
+    
     //external magnetic field
     double h;                     
-
+    
     //coupling constant (Ry)
     double * J = new double [2];
-
-    //boltzmann constant(Ry K^-1)
-    //double kB = 0.0000063306;
     
-    //boltzmann constant(meV K^-1)
-    double kB = 8.6173303E-08; 
-
-    //lattice constant for Fe
-    double a;                                               //a.u.
-    double L;
-
+    //boltzmann constant(Ry K^-1)
+    double kB = 0.0000063306;
+        
     char * temp = new char[30];
-
+    
+    
     ifstream infile("hinput");
     if (infile)
     {
@@ -529,22 +568,26 @@ int main(int argc, char *argv[]){
         infile>>temp>>temp>>J[1];
         infile>>temp>>temp>>MCSteps;
         infile>>temp>>temp>>freq;
-
+        
         infile.close();
     }
     else{ cout << "hinput not found!\n"; return 0; }
-
-
+    
+  
+    
     //number of equilibration steps
     int eqSteps = 0.5*MCSteps;          
-
+  
+  
+    
+     //populate neighbor lists
+    double **first_nn ;
+    double **second_nn ;
+    
     int num_1st_nn,num_2nd_nn;
     double * num_nn;
     num_nn = new double [2];
 
-
-    double ** first_nn;
-    double ** second_nn;
     
     ifstream infile2 ("neighbor_lists.txt");
     if (infile2.is_open())
@@ -552,169 +595,133 @@ int main(int argc, char *argv[]){
 
         infile2>>N;
         infile2>>num_1st_nn>>num_2nd_nn;
-
+    
         num_nn[0] = num_1st_nn;
         num_nn[1] = num_2nd_nn;
 
         //populate neighbor lists
         first_nn = new double * [N];
         second_nn = new double * [N];
-
+    
         for (int i = 0; i < N; i++)
         {
-            first_nn[i] = new double [num_1st_nn];
-            second_nn[i] = new double [num_2nd_nn];
-        }  
-
-
-        for (int i = 0; i < N; i++){
-             
-
+          first_nn[i] = new double [num_1st_nn];
+          second_nn[i] = new double [num_2nd_nn];
+        }
+    
+        for (int i = 0; i < N; i++)
+        {
             for (int j = 0; j < num_1st_nn; j++){
                 infile2 >> first_nn[i][j]; 
-
-              
               }
-
             for (int j = 0; j < num_2nd_nn; j++){
                 infile2 >> second_nn[i][j]; 
-             
               }
-
-
-          
-          }
-
-
+        }
 
         infile2.close();
-    }else{ cout << "'neighbor_lists.txt' not found! \n"; return 0; }
-
-
+        
+    }else{ 
+        cout << "'neighbor_lists.txt' not found! \n"; 
+        return 0; 
+        
+    }
+    
+      
     //initialize spin configuration
     double **si = new double * [N];
     for (int i = 0; i < N; i++)
-    si[i] = new double [8];
+        si[i] = new double [8];
     
     initialize(N, si );
+    
 
-
+    
+    //bcc_neighbor_lists(N, L, a, si, first_nn, second_nn);
+    
+    
+    
     //calculate initial Magnetization and Energy
     double M = Magnetization(N, si);
-    double H = Energy(N, si, num_nn, first_nn, second_nn, h, J);
-
-  /*
-    cout << N << "\n";
-    cout << T << "\t" << h << "\t" << J[0] << "\t" << J[1] << "\n";
+    double H = Energy(N, si, first_nn, second_nn, h, J);
     
     
+    //print out inital configuration and neighbor lists
+    
+    ofstream ifile; ifile.open("init.txt");
     for (int i = 0; i < N; i++){
-        cout << i << "\t";
-        
-        for (int j = 0; j < num_1st_nn; j++){
-                cout << first_nn[i][j]<< "\t"; 
-
-              
-              }
-
-        for (int j = 0; j < num_2nd_nn; j++){
-                cout << second_nn[i][j] << "\t";
-             
-              }
-         cout << si[i][2] << "\t" << si[i][3] << "\t" << si[i][4] << "\n";     
+        ifile << si[i][0] << "\t" << si[i][1] << "\t" 
+              << si[i][2] << "\t" << si[i][3] << "\t" << si[i][4] << "\t"
+              << si[i][5] << "\t" << si[i][6] << "\t" << si[i][7] << "\n";
     }
     
-    cout << M << "\t" << H << "\n";
     
-    return 0;
-    
- */
- 
-    
+   
     //Average and Variance
     double MAvg=0.0, HAvg=0.0, MVar=0.0, HVar=0.0;
     double M2Avg=0.0, H2Avg=0.0, M2Var=0.0, H2Var=0.0;
-
+    
     //holder for final calculated quantities
     double * data = new double  [10];
     for (int i =0; i < 10; i++) data[i] = 0.0;
-
-
+    
+    
     double kT = kB*T;
-/*
+    
     //Equilibration steps (burn-in)
     for (int step = 0; step < eqSteps; step++)
     {
-        MC_move(N, si, num_nn,  first_nn, second_nn, h, J, M, H, kT);
-       //cout << step << "\t" <<M <<"\t" << MAvg << "\t" << HAvg << "\n"; 
+        MC_move(N, si, first_nn, second_nn, h, J, M, H, kT);
+        //cout << step << "\t" <<M <<"\t" << MAvg << "\t" << HAvg << "\n"; 
     }
-
-*/
+    
+    
     int cc = 0;
     ofstream afile; afile.open("aucf.out");
-    ofstream mfile; mfile.open("m_snap.out");
-    int snapshot = int ( double( MCSteps) / double (freq) ) ;
+    
     //Production steps
     for (int step = 0; step < MCSteps; step++)
     {
         //each move is a complete lattice sweep - N*N*N steps 
-        MC_move(N, si, num_nn,  first_nn, second_nn, h, J, M, H, kT);
-
+        MC_move(N, si, first_nn, second_nn, h, J, M, H, kT);
+        
         M = Magnetization(N, si);
-        H = Energy(N, si, num_nn, first_nn, second_nn, h, J);
-
+        H = Energy(N, si, first_nn, second_nn, h, J);
+        
         ave_var(cc, MAvg, MVar, M);
         ave_var(cc, HAvg, HVar, H);
         ave_var(cc, M2Avg, M2Var, M*M);
         ave_var(cc, H2Avg, H2Var, H*H);
         
-        cout << step << "\t" <<M <<"\t" << MAvg << "\t" << HAvg << "\n";
-
         //sample every 'freq' steps
-        if (step % freq == 0 )
+        if (step % freq ==0 )
         {              
             //save snapshot to aucf.out
             afile << cc <<"\t" << M <<"\t" << H << "\n";
-
+            
             cc+=1;
-
-        }	//end if freq
-
-        if (step % snapshot == 0 )
-        {              
-
-	    for (int i = 0; i < N; i++ ){
-
-		 mfile <<  i       << "\t" << si[i][0] << "\t" << si[i][1] << "\t" 
-		       << si[i][2] << "\t" << si[i][3] << "\t" << si[i][4] << "\n"; 
-
-	    }
-
-        }                                                   //end if freq
-
-
-
-    }                                                       //end loop over MCSteps
-
+            
+        }//end if freq
+        
+    }//end loop over MCSteps
+    
     //accumulate data
     data[0] = MAvg; data[1] = MVar;
     data[2] = M2Avg; data[3] = M2Var;
     data[4] = HAvg; data[5] = HVar;
     data[6] = H2Avg; data[7] = H2Var;
     data[8] = T; data[9] = kB;
-
+    
     save_data(N,MCSteps,data);
-
+    
     afile.close();    
-    mfile.close();    
-
+    
     free(data);
     free(si);
-    free(num_nn);
     free(first_nn);
     free (second_nn);
-
-
-
+    
+    
+    
     return 0;
-  }
+}
