@@ -85,6 +85,9 @@ double magnetization(int N, double **si){
 
 double energy(int N, double ** si, double ** first_nn, double ** second_nn, int * num_nn, double * J){
     
+    //ENERGY
+    //Energy sweep - calculate energy of lattice in single sweep
+    //Reset e_storage magnetization calc variables
    
     int i,j,k;
     double e_total = 0.0;
@@ -152,7 +155,7 @@ double energy(int N, double ** si, double ** first_nn, double ** second_nn, int 
     }
     
     
-    //Calculate energy ( factor of 1/2 to account for double counting in loop: <s_i> = <s_j> )
+    //Calculate energy
     double e = e_total/2.0;
     
     free (spinSum);
@@ -203,9 +206,10 @@ void mc_step(int N, double ** si, double ** first_nn, double ** second_nn, int *
         //cout << s << "\t"<< i << "\t" << j << "\t" << k << "\t" << theta << "\t" << phi << "\n";
         //Propose new spin value
         thetaPrime  = rng_theta();
-        phiPrime = rng_phi();
+        phiPrime = phi;
         
     
+        //checking theta, keep phiPrime the same
         
         //Left side of dot product
         spinDiff[0] = sin(thetaPrime)*cos(phiPrime) - sin(theta)*cos(phi);
@@ -245,7 +249,7 @@ void mc_step(int N, double ** si, double ** first_nn, double ** second_nn, int *
         double deltaE = -J[0]*dotProduct_n - J[1]*dotProduct_nn;
         
         
-        //Metropolis Acceptance Conditions
+        //Acceptance check
         test++;
         if (deltaE <= 0)
         {
@@ -256,7 +260,7 @@ void mc_step(int N, double ** si, double ** first_nn, double ** second_nn, int *
         
         else //deltaE > 0
         {
-            double prob = exp(-beta*deltaE);
+            double prob = (sin(thetaPrime)/sin(theta))*exp(-beta*deltaE);
             double randNum = dist(engine);
             
             if (randNum <= prob)
@@ -268,8 +272,79 @@ void mc_step(int N, double ** si, double ** first_nn, double ** second_nn, int *
             
         }
         
-       
-    }//end sweep
+        //Current spin value
+        theta = si[i][0];
+        phi = si[i][1];
+        
+        
+       //checking phi, keep thetaPrime the same 
+        
+        //Propose new spin value
+        thetaPrime  = theta;
+        phiPrime = rng_phi();
+        
+        
+        //Left side of dot product
+        spinDiff[0] = sin(thetaPrime)*cos(phiPrime) - sin(theta)*cos(phi);
+        spinDiff[1] = sin(thetaPrime)*sin(phiPrime) - sin(theta)*sin(phi);
+        spinDiff[2] = cos(thetaPrime) - cos(theta);
+   
+    
+                        
+        for (int j = 0; j < num_nn[0]; j++)
+        {
+            n_theta  = si[(int)first_nn[i][j]][0];
+            n_phi = si[(int)first_nn[i][j]][1];
+            
+            spinSum[0] = spinSum[0] + sin(n_theta)*cos(n_phi);
+            spinSum[1] = spinSum[1] + sin(n_theta)*sin(n_phi);
+            spinSum[2] = spinSum[2] + cos(n_theta);
+        }
+        
+        dotProduct_n = spinDiff[0]*spinSum[0] + spinDiff[1]*spinSum[1] + spinDiff[2]*spinSum[2];
+        
+        spinSum[0] = 0.0;
+        spinSum[1] = 0.0;
+        spinSum[2] = 0.0;
+        
+        for (int j = 0; j < num_nn[1]; j++)
+        {
+            nn_theta  = si[(int)second_nn[i][j]][0];
+            nn_phi = si[(int)second_nn[i][j]][1];
+            
+            spinSum[0] = spinSum[0] + sin(nn_theta)*cos(nn_phi);
+            spinSum[1] = spinSum[1] + sin(nn_theta)*sin(nn_phi);
+            spinSum[2] = spinSum[2] + cos(nn_theta);
+        }
+        
+        dotProduct_nn = spinDiff[0]*spinSum[0] + spinDiff[1]*spinSum[1] + spinDiff[2]*spinSum[2];
+        
+        //Change in energy
+        deltaE = -J[0]*dotProduct_n - J[1]*dotProduct_nn;
+        
+
+        //Acceptance check
+        test++;
+        if (deltaE <= 0)
+        {
+            si[i][0] = thetaPrime;
+            si[i][1] = phiPrime;
+            accept++;
+        }
+        
+        else //deltaE > 0
+        {
+            double prob = (sin(thetaPrime)/sin(theta))*exp(-beta*deltaE);
+            double randNum = dist(engine);
+            
+            if (randNum <= prob)
+            {
+                si[i][0] = thetaPrime;
+                si[i][1] = phiPrime;
+                accept++;
+            }
+        }
+    }
     
     
     
@@ -358,8 +433,8 @@ void save_data(int N, int MCSteps,double * data)
     //Susceptibility
     double X = (beta*MN)*( M2Avg - (MAvg*MAvg));
     
-    //Specific Heat - need to check
-    double Cv = (1.0/ (beta2*MN) )*(H2Avg - (HAvg*HAvg));
+    //Specific Heat
+    double Cv = (beta2*MN)*(H2Avg - (HAvg*HAvg));
     
     double b_par = 1.0 - ( (1.0/3.0) * (M4Avg)/ (M2Avg*M2Avg) );
     //write to file
@@ -525,6 +600,8 @@ int main(int argc, char *argv[]){
     //print initial config to file
     for (int i = 0 ; i < N; i++)
     {
+        
+        //Current angles
         double theta = si[i][0];
         double phi = si[i][1];
         ifile << i << "\t" << theta << "\t" << phi << "\n";
@@ -544,11 +621,10 @@ int main(int argc, char *argv[]){
         cout << "done T = " << temperature << "\n";
     }
 
-     
+    
+    
     free(si);
     
     return 0;
     
 }
-
-
