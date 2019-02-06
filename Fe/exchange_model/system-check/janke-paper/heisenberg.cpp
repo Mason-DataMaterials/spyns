@@ -33,8 +33,8 @@ double rng_phi(void)
 void temp_init(double * temps)
 {
     int t; //Counters
-    double MAX_TEMP_STEPS = 10.0;
-    double MAX_TEMP = 3.5;
+    double MAX_TEMP_STEPS = 5.0;
+    double MAX_TEMP = 2.5;
     //Temperature array initialization
     for (t = 0; t < MAX_TEMP_STEPS; t++)
     {
@@ -178,7 +178,7 @@ double trial_spin_energy_at_site(int site, double ** si, double ** neighbor_list
     
     double * spinSum = new double [3];
     
-    for (i =0; i<3; i++){
+    for (i=0; i<3; i++){
         spinSum[i] = 0.0;
     }
     
@@ -212,7 +212,7 @@ bool trial_flip( double &deltaE, double current_site_energy, double trial_energy
     
     deltaE = trial_energy - current_site_energy;
     
-    if (deltaE <= 0)
+    if (deltaE <= 0.0)
         {
            return true;
         }
@@ -222,7 +222,7 @@ bool trial_flip( double &deltaE, double current_site_energy, double trial_energy
             double prob = exp(-beta*deltaE);
             double randNum = dist(engine);
             
-            if (randNum <= prob)
+            if (randNum < prob)
             {
                 return true;
             }
@@ -235,6 +235,7 @@ bool trial_flip( double &deltaE, double current_site_energy, double trial_energy
 
 void mc_step(int N, double ** si, int num_neighbors, double ** neighbor_list, double * J,  double temperature){
     
+    uniform_int_distribution<int> nsites_gen(0, N - 1);
     
     double beta = 1.0/temperature;
     
@@ -250,7 +251,6 @@ void mc_step(int N, double ** si, int num_neighbors, double ** neighbor_list, do
     for (int sweep = 0; sweep < N; sweep++)
     {
        //random spin site
-        uniform_int_distribution<int> nsites_gen(0, N - 1);
         int i = nsites_gen(engine);
         
         
@@ -361,7 +361,7 @@ void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list,
     int step;
     
     //equilibration
-    for ( step = 0; step < 2500; step++){
+    for ( step = 0; step < 25000; step++){
         
         mc_step( N, si, num_neighbors, neighbor_list, J,  kT);
     }
@@ -497,7 +497,7 @@ int main(int argc, char *argv[]){
     
     
     //2-loop over temperature values
-    for (int i = 0; i < 8; i++){
+    for (int i = 0; i < 5; i++){
         
         double temperature = temps[i];
         temp_step( N, si, num_neighbors, neighbor_list, J,temperature, MCSteps, sampling_freq);
