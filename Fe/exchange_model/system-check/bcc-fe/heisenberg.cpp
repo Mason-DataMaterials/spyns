@@ -14,9 +14,6 @@ random_device rd;
 mt19937 engine(rd());
 uniform_real_distribution<double> dist(0.0, 1.0);
 
-
-
-
 //Random theta [0,pi]
 double rng_theta(void)
 {
@@ -31,258 +28,8 @@ double rng_phi(void)
     return p;
 }
 
-//Initialize the lattice/spin array
-void initialize(int N, double ** lattice)
-{
-    int i,j,k; //Counters
-    //Populate initialization lattice
-    for (i = 0 ; i < N; i++)
-    {
-        
-        lattice[i][0] = rng_theta();
-        lattice[i][1] = rng_phi();
-        //printf("Init latice: %f\t%f\n",lattice[i][0],lattice[i][1]);
-    }
-}
 
-
-double magnetization(int N, double **si){
-    
-    //MAGNETIZATION
-    //m_rms = M = (1/N)sqrt(sum(S_i*S_i))
-    //NOTE: (Sx, Sy, Sz) = (sin(theta)cos(phi), sin(theta)cos(phi), cos(theta))
-    double Mxsum = 0.0;
-    double Mysum = 0.0;
-    double Mzsum = 0.0;
-    
-    
-    int i,j,k; //Counters
-    //Populate initialization lattice
-    for (i = 0 ; i < N; i++)
-    {
-        //Current angles
-        double theta = si[i][0];
-        double phi = si[i][1];
-        
-        double X = sin(theta)*cos(phi);
-        double Y = sin(theta)*sin(phi);
-        double Z = cos(theta);
-        
-        Mxsum += X;
-        Mysum += Y;
-        Mzsum += Z;
-    }
-    
-    double Mx = Mxsum/(double)N;
-    double My = Mysum/(double)N;
-    double Mz = Mzsum/(double)N;
-    double M = sqrt(Mx*Mx + My*My + Mz*Mz);
-    
-    return M;
-    
-}
-
-
-double energy(int N, double ** si, double ** first_nn, double ** second_nn, int * num_nn, double * J){
-    
-   
-    int i,j,k;
-    double e_total = 0.0;
-    double spinX, spinY,spinZ;
-    double theta, phi, n_theta, n_phi, nn_theta, nn_phi;
-    
-    
-       
-    double * spinSum = new double [3];
-    for (i =0; i<3; i++){
-        spinSum[i] = 0.0;
-    }
-          
-    
-    for (i = 0 ; i < N; i++)
-    {
-        
-        //Current angles
-        theta = si[i][0];
-        phi = si[i][1];
-        //cout << i << "\t" << j << "\t" << k << "\t" << theta << "\t" << phi << "\n";
-        
-        //Left side of dot product
-        spinX = sin(theta)*cos(phi);
-        spinY = sin(theta)*sin(phi);
-        spinZ = cos(theta);
-        
-        
-        
-        //Dot product calculation
-        //E = -J (Si_current)*(S1 + S2+ S3+ S4+ S5+ S6)
-        //(Sx, Sy, Sz) = (sin(theta)cos(phi), sin(theta)cos(phi), cos(theta))
-        
-        for (int j = 0; j < num_nn[0]; j++)
-        {
-            n_theta  = si[(int)first_nn[i][j]][0];
-            n_phi = si[(int)first_nn[i][j]][1];
-            
-            spinSum[0] = spinSum[0] + sin(n_theta)*cos(n_phi);
-            spinSum[1] = spinSum[1] + sin(n_theta)*sin(n_phi);
-            spinSum[2] = spinSum[2] + cos(n_theta);
-        }
-        
-        double dotProduct_n = spinX*spinSum[0] + spinY*spinSum[1] + spinZ*spinSum[2];
-        
-        spinSum[0] = 0.0;
-        spinSum[1] = 0.0;
-        spinSum[2] = 0.0;
-        
-        for (int j = 0; j < num_nn[1]; j++)
-        {
-            nn_theta  = si[(int)second_nn[i][j]][0];
-            nn_phi = si[(int)second_nn[i][j]][1];
-            
-            spinSum[0] = spinSum[0] + sin(nn_theta)*cos(nn_phi);
-            spinSum[1] = spinSum[1] + sin(nn_theta)*sin(nn_phi);
-            spinSum[2] = spinSum[2] + cos(nn_theta);
-        }
-        
-        double dotProduct_nn = spinX*spinSum[0] + spinY*spinSum[1] + spinZ*spinSum[2];
-        
-        //Energy summation calculation
-        e_total = e_total - J[0]*dotProduct_n - J[1]*dotProduct_nn;
-        
-    }
-    
-    
-    //Calculate energy ( factor of 1/2 to account for double counting in loop: <s_i> = <s_j> )
-    double e = e_total/2.0;
-    
-    free (spinSum);
-    
-    return e;
-    
-}
-
-void mc_step(int N, double ** si, double ** first_nn, double ** second_nn, int * num_nn, double * J, 
-             double temperature, double &accept, double &test){
-    
-    
-    int i,j,k;
-    double * currentSpin = new double [2];
-    double * oldSpin = new double [2];
-    double * newSpin = new double [2];
-    for (i =0; i<2; i++){
-        currentSpin[i] = 0.0;
-        oldSpin[i] = 0.0;
-        newSpin[i] = 0.0;
-    }
-    
-    double theta, phi, thetaPrime, phiPrime, n_theta, n_phi, nn_theta, nn_phi;
-    double * spinDiff = new double [3];
-    double * spinSum = new double [3];
-    for (i =0; i<3; i++){
-        spinDiff[i] = 0.0;
-        spinSum[i] = 0.0;
-    }
-    
-    
-    double beta = 1.0/temperature;
-    
-  //Sweeps
-    for (int sweep = 0; sweep < N; sweep++)
-    {
-       //random spin site
-        uniform_int_distribution<int> nsites_gen(0, N - 1);
-        i = nsites_gen(engine);
-        j = nsites_gen(engine);
-        k = nsites_gen(engine); 
-        
-       
-        //Current spin value
-        theta = si[i][0];
-        phi = si[i][1];
-        
-        //cout << s << "\t"<< i << "\t" << j << "\t" << k << "\t" << theta << "\t" << phi << "\n";
-        //Propose new spin value
-        thetaPrime  = rng_theta();
-        phiPrime = rng_phi();
-        
-    
-        
-        //Left side of dot product
-        spinDiff[0] = sin(thetaPrime)*cos(phiPrime) - sin(theta)*cos(phi);
-        spinDiff[1] = sin(thetaPrime)*sin(phiPrime) - sin(theta)*sin(phi);
-        spinDiff[2] = cos(thetaPrime) - cos(theta);
-        
-                
-        for (int j = 0; j < num_nn[0]; j++)
-        {
-            n_theta  = si[(int)first_nn[i][j]][0];
-            n_phi = si[(int)first_nn[i][j]][1];
-            
-            spinSum[0] = spinSum[0] + sin(n_theta)*cos(n_phi);
-            spinSum[1] = spinSum[1] + sin(n_theta)*sin(n_phi);
-            spinSum[2] = spinSum[2] + cos(n_theta);
-        }
-        
-        double dotProduct_n = spinDiff[0]*spinSum[0] + spinDiff[1]*spinSum[1] + spinDiff[2]*spinSum[2];
-        
-        spinSum[0] = 0.0;
-        spinSum[1] = 0.0;
-        spinSum[2] = 0.0;
-        
-        for (int j = 0; j < num_nn[1]; j++)
-        {
-            nn_theta  = si[(int)second_nn[i][j]][0];
-            nn_phi = si[(int)second_nn[i][j]][1];
-            
-            spinSum[0] = spinSum[0] + sin(nn_theta)*cos(nn_phi);
-            spinSum[1] = spinSum[1] + sin(nn_theta)*sin(nn_phi);
-            spinSum[2] = spinSum[2] + cos(nn_theta);
-        }
-        
-        double dotProduct_nn = spinDiff[0]*spinSum[0] + spinDiff[1]*spinSum[1] + spinDiff[2]*spinSum[2];
-        
-        //Change in energy
-        double deltaE = -J[0]*dotProduct_n - J[1]*dotProduct_nn;
-        
-        
-        //Metropolis Acceptance Conditions
-        test++;
-        if (deltaE <= 0)
-        {
-            si[i][0] = thetaPrime;
-            si[i][1] = phiPrime;
-            accept++;
-        }
-        
-        else //deltaE > 0
-        {
-            double prob = exp(-beta*deltaE);
-            double randNum = dist(engine);
-            
-            if (randNum <= prob)
-            {
-                si[i][0] = thetaPrime;
-                si[i][1] = phiPrime;
-                accept++;
-            }
-            
-        }
-        
-       
-    }//end sweep
-    
-    
-    
-    free (currentSpin);
-    free (oldSpin);
-    free (newSpin);
-    free (spinDiff);
-    free (spinSum);
-    
-    return;
-}
-
-//Temperature array initialization
+//temperature values array initialization
 void temp_init(double * temps)
 {
     int t; //Counters
@@ -296,15 +43,249 @@ void temp_init(double * temps)
     }
 }
 
-/* ave_var(cc, Avg, Var, U)
- * calculates and upates the instantaneous average (Avg)
- * and variance (Var) values of a quantity (U) at a time
- * step (cc).
- * takes in: cc  - time step
- *           U   - quantity being averaged (M,H, M^2, H^2)
- *           Avg - variable for the average value
- *           Var - variable for the variance
- */
+//Initialize the lattice/spin array
+void initialize(int N, double ** si)
+{
+    int i,j,k; //Counters
+    double theta, phi;
+    //Populate initialization lattice
+    for (i = 0 ; i < N; i++)
+    {
+        
+        theta = rng_theta();
+        phi = rng_phi();
+        si[i][0] = theta;
+        si[i][1] = phi;
+        si[i][2] = sin(theta)*cos(phi);
+        si[i][3] = sin(theta)*sin(phi);
+        si[i][4] = cos(theta);
+       // printf("Initial lattice: %f\t%f\n",si[i][0],si[i][1]);
+    }
+    
+    return;
+}
+
+
+double magnetization(int N, double **si){
+    
+    
+    double Mxsum = 0.0;
+    double Mysum = 0.0;
+    double Mzsum = 0.0;
+    
+    
+    int i,j,k; //Counters
+    //Populate initialization lattice
+    for (i = 0 ; i < N; i++)
+    {
+        //Current angles
+        
+        double spinX = si[i][2];
+        double spinY = si[i][3];
+        double spinZ = si[i][4];
+        
+        
+        Mxsum += spinX;
+        Mysum += spinY;
+        Mzsum += spinZ;
+    }
+    
+    double Mx = Mxsum/(double)N;
+    double My = Mysum/(double)N;
+    double Mz = Mzsum/(double)N;
+    
+    double M = sqrt(Mx*Mx + My*My + Mz*Mz);
+    
+    return M;
+    
+}
+
+
+double site_energy(int site, double ** si, double ** neighbor_list, int num_neighbors, double * J){
+    
+    int i,j,k;
+    double e_site = 0.0;
+    double spinX, spinY,spinZ;
+    
+    
+    double * spinSum = new double [3];
+    for (i =0; i<3; i++){
+        spinSum[i] = 0.0;
+    }
+    
+    
+    //Dot product calculation
+    //E = -J (Si_current)*(S1 + S2 + S3 + S4 + S5 + S6)
+    
+    //lookup neighbors and sum
+    for (int j = 0; j < num_neighbors; j++)
+    {
+        //sum ( Sj_k * J ) , k=x,y,z
+        spinSum[0] = spinSum[0] + si[(int)neighbor_list[site][j]][2]*J[j]; //J * Sj_x
+        spinSum[1] = spinSum[1] + si[(int)neighbor_list[site][j]][3]*J[j]; //J * Sj_y
+        spinSum[2] = spinSum[2] + si[(int)neighbor_list[site][j]][4]*J[j]; //J * Sj_z
+    }
+    
+    spinX = si[site][2];
+    spinY = si[site][3];
+    spinZ = si[site][4];
+    
+    //( Si_k * Sj_k * J )
+    double dotProduct_J = spinX*spinSum[0] + spinY*spinSum[1] + spinZ*spinSum[2];
+    
+    //Energy summation calculation: sum(-Jj * Si_k * Sj_k) over j 
+    e_site = - dotProduct_J;
+    
+    free (spinSum);
+    
+    return e_site;
+    
+}
+
+double total_energy( int N, double ** si, double ** neighbor_list, int num_neighbors, double * J){
+    
+    double e_total = 0.0;
+    
+    for (int i = 0; i < N; i++){
+        
+       e_total += site_energy(i, si, neighbor_list, num_neighbors,  J);
+    }
+    
+    return e_total/2.0;
+        
+}
+
+void get_trial_spin_for_site(double * trial_spin){
+    
+        double theta = rng_theta();
+        double phi = rng_phi();
+        trial_spin[0] = theta;
+        trial_spin[1] = phi;
+        trial_spin[2] = sin(theta)*cos(phi);
+        trial_spin[3] = sin(theta)*sin(phi);
+        trial_spin[4] = cos(theta);
+        
+        return;
+}
+
+
+double trial_spin_energy_at_site(int site, double ** si, double ** neighbor_list, int num_neighbors, double * J, double * trial_spin ){
+    
+    int i,j,k;
+    double e_trial = 0.0;
+    double spinX, spinY,spinZ;
+    
+    
+    double * spinSum = new double [3];
+    
+    for (i =0; i<3; i++){
+        spinSum[i] = 0.0;
+    }
+    
+    
+    //lookup neighbors and sum
+    for (int j = 0; j < num_neighbors; j++)
+    {
+        //sum ( Sj_k * J ) , k=x,y,z
+        spinSum[0] = spinSum[0] + si[(int)neighbor_list[site][j]][2]*J[j]; //J * Sj_x
+        spinSum[1] = spinSum[1] + si[(int)neighbor_list[site][j]][3]*J[j]; //J * Sj_y
+        spinSum[2] = spinSum[2] + si[(int)neighbor_list[site][j]][4]*J[j]; //J * Sj_z
+    }
+    
+    spinX = trial_spin[2];
+    spinY = trial_spin[3];
+    spinZ = trial_spin[4];
+    
+    //( Si_k * Sj_k * J )
+    double dotProduct_J = spinX*spinSum[0] + spinY*spinSum[1] + spinZ*spinSum[2];
+    
+    //Energy summation calculation: sum(-Jj * Si_k * Sj_k) over j 
+    e_trial = - dotProduct_J;
+    
+    free (spinSum);
+    
+    return e_trial;
+}
+
+
+bool trial_flip( double &deltaE, double current_site_energy, double trial_energy, double beta ){
+    
+    deltaE = trial_energy - current_site_energy;
+    
+    if (deltaE <= 0)
+        {
+           return true;
+        }
+        
+        else //deltaE > 0
+        {
+            double prob = exp(-beta*deltaE);
+            double randNum = dist(engine);
+            
+            if (randNum < prob)
+            {
+                return true;
+            }
+        }
+                
+        return false;
+}
+
+
+
+void mc_step(int N, double ** si, int num_neighbors, double ** neighbor_list, double * J,  double temperature){
+    
+    uniform_int_distribution<int> nsites_gen(0, N - 1);
+    
+    double beta = 1.0/temperature;
+    
+    double * trial_spin = new double [5];
+    
+    double deltaE;
+    double current_site_energy;
+    double trial_spin_energy;
+    
+    bool keep_trial_spin = false;
+    
+    //Sweeps
+    for (int sweep = 0; sweep < N; sweep++)
+    {
+       //random spin site
+        int i = nsites_gen(engine);
+        
+        
+        for (int j = 0; j < 5; j++){
+            trial_spin[j] = 0.0;
+        }
+        
+        get_trial_spin_for_site(trial_spin);
+
+        current_site_energy = site_energy( i, si, neighbor_list, num_neighbors, J );
+        trial_spin_energy = trial_spin_energy_at_site( i, si, neighbor_list, num_neighbors,J, trial_spin );
+    
+        deltaE = 0.0;
+        keep_trial_spin = trial_flip (deltaE, current_site_energy, trial_spin_energy, beta);
+        
+        //update is trial spin is accepted
+        if (keep_trial_spin){
+            
+            si[i][0] = trial_spin[0]; //theta
+            si[i][1] = trial_spin[1]; //phi
+            si[i][2] = trial_spin[2]; //sin(theta)*cos(phi);
+            si[i][3] = trial_spin[3]; //sin(theta)*sin(phi);
+            si[i][4] = trial_spin[4]; //cos(theta);
+        }
+        
+    }//end sweep
+    
+    
+    free (trial_spin);
+    
+    return;
+    
+}
+
+
 void ave_var(int cc, double &Avg, double &Var, double U)
 {
     
@@ -315,16 +296,6 @@ void ave_var(int cc, double &Avg, double &Var, double U)
     Var = cc == 0 ? 0 : Var * cc + (U - old_Avg) * (U - Avg);
     Var /= (cc + 1);
 }
-/* save_data(N, nT, data, h, J)
- * saves calculated quantities to file
- *
- * takes in: N - length of one side
- *           si - 3D lattice of spin sites
- *           nT - number of temperature steps
- *           data - calculated values and averages
- *           h - external manetic field
- *           J - nearest neighbor coupling constant
- */
 
 void save_data(int N, int MCSteps,double * data)
 {
@@ -356,14 +327,14 @@ void save_data(int N, int MCSteps,double * data)
     double MN = 1.0/double (MCSteps*N);
     
     //Susceptibility
-    double X = (beta*MN)*( M2Avg - (MAvg*MAvg));
+    double X = (beta/MN)*( M2Avg - (MAvg*MAvg));
     
-    //Specific Heat - need to check
-    double Cv = (1.0/ (beta2*MN) )*(H2Avg - (HAvg*HAvg));
+    //Specific Heat
+    double Cv = (beta2*MN)*(H2Avg - (HAvg*HAvg));
     
     double b_par = 1.0 - ( (1.0/3.0) * (M4Avg)/ (M2Avg*M2Avg) );
     //write to file
-    hfile << T << "\t"
+    hfile << T << "\t" << beta << "\t"
     << MAvg << "\t" << MVar << "\t" << M2Avg << "\t" << M2Var << "\t"
     << HAvg << "\t" << HVar << "\t" << H2Avg << "\t" << H2Var << "\t"
     << X    << "\t" << Cv   << "\t" 
@@ -375,61 +346,61 @@ void save_data(int N, int MCSteps,double * data)
     return;
 }
 
-void temp_step( int N, double ** si, double ** first_nn, double ** second_nn, int * num_nn, double * J, 
-             double temperature, int MCSteps, int sampling_freq){
+
+void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list, double *J,  
+                double temperature, int MCSteps, int sampling_freq){
     
-    double accept=0.0, test=0.0;
     
-    double H = 0.0, M = 0.0;
+    //total energy magnetization
+    double H = 0.0 , M = 0.0;
+    
+    double kB = 8.617330350E-5; //eVK^-1
+    double kT = 1000.0*kB*temperature; //meV
+    //double kT = temperature;
+    
+    int step;
+    
+    //equilibration
+    for ( step = 0; step < 50000; step++){
+        
+        mc_step( N, si, num_neighbors, neighbor_list, J,  kT);
+    }
+    
+    
+    //holder for final calculated quantities
+    double * data = new double  [14];
+    for (int i =0; i < 14; i++) data[i] = 0.0;
     
     //Average and Variance
     double MAvg=0.0, HAvg=0.0, MVar=0.0, HVar=0.0;
     double M2Avg=0.0, H2Avg=0.0, M2Var=0.0, H2Var=0.0;
     double M4Avg=0.0, H4Avg=0.0, M4Var=0.0, H4Var=0.0;
     
-    //hold final calculated quantities
-    double * data = new double  [14];
-    for (int i =0; i < 14; i++) data[i] = 0.0;
     
-    int step = 0;
-    int cc = 0;
-    
-    double kB = 8.617330350E-5; //eVK^-1
-    double kT = 1000*kB*temperature; //meV
-    
-    cout << "Equilibrating for T = " << temperature << "\n";
-    //equlibration
-    for (step = 0; step < 25000; step++){
+    //production steps
+    int cc =0;
+    for ( step = 0; step < MCSteps; step++){
         
-        mc_step( N, si, first_nn, second_nn, num_nn, J, kT, accept, test );
-    }
-    
-    cout << "Calculating for T = " << temperature << "\n";
-    //measurement
-    for (step = 0; step < MCSteps; step++){
+
+        mc_step( N, si, num_neighbors, neighbor_list, J,  kT);
         
-       mc_step( N, si, first_nn, second_nn, num_nn, J, kT, accept, test );
-        
-        
-       //cout << step <<"\t" <<  H << "\t" << M << "\t" << accept/test << "\n";
-        
-        if (step % sampling_freq == 0 )
+         if (step % sampling_freq == 0 )
         { 
+           
+            H = total_energy( N, si, neighbor_list, num_neighbors, J);
             M = magnetization (N, si);
-            H = energy( N, si, first_nn, second_nn, num_nn, J); 
             
             ave_var(cc, MAvg, MVar, M);
             ave_var(cc, HAvg, HVar, H);
             ave_var(cc, M2Avg, M2Var, M*M);
             ave_var(cc, H2Avg, H2Var, H*H);
             ave_var(cc, M4Avg, M4Var, M*M*M*M);
-            
-           //cout << cc <<"\t" <<  HAvg << "\t" << MAvg  << "\n";
+            //cout << cc <<"\t" <<  H << "\t" << HAvg  << "\n";
             cc++;
         }
         
-        
     }
+    
     
     //accumulate data
     data[0] = MAvg; data[1] = MVar;
@@ -440,63 +411,57 @@ void temp_step( int N, double ** si, double ** first_nn, double ** second_nn, in
     data[10] = M4Avg; data[11] = M4Var;
     
     
-    save_data(N,(int) ((double)step/(double)sampling_freq),data);
+    //print to file
+    save_data( N, (int) ((double)step/(double)sampling_freq),data);
+    
     
     free(data);
     
     
-    return;
+    return;    
 }
 
-
 int main(int argc, char *argv[]){
+
     
     int N;
-    double * J = new double [2];
+    int num_neighbors;
+    double ** neighbor_list;
+    double * J;
     
-    J[0] = 13.1; //meV
-    J[1] = 13.7; //meV
-    
-    double temperature = 0.1;
-    int MCSteps = 75000;
+    int MCSteps = 100000;
     int sampling_freq = 50;
     
+    //double J1 = 1.0;
+    //double J2 = 0.0;
+    double J1 = 13.1; //meV
+    double J2 = 13.7; //meV
+    J1 = J1*2.0;
+    J2 = J2*2.0;
     
+    //read in tables and build lists
     int num_1st_nn,num_2nd_nn;
-    int * num_nn;
-    num_nn = new int [2];
-
-
-    double ** first_nn;
-    double ** second_nn;
-    
     ifstream infile2 ("neighbor_lists.txt");
+    
     if (infile2.is_open())
     {
         
         infile2>>N;
         infile2>>num_1st_nn>>num_2nd_nn;
         
-        num_nn[0] = num_1st_nn;
-        num_nn[1] = num_2nd_nn;
+        num_neighbors = num_1st_nn + num_2nd_nn;
         
         //populate neighbor lists
-        first_nn = new double * [N];
-        second_nn = new double * [N];
+        neighbor_list =  new double * [N];
         
         for (int i = 0; i < N; i++)
         {
-            first_nn[i] = new double [num_1st_nn];
-            second_nn[i] = new double [num_2nd_nn];
+            neighbor_list[i] = new double [num_neighbors];
         }  
         
         for (int i = 0; i < N; i++){
-            for (int j = 0; j < num_1st_nn; j++){
-                infile2 >> first_nn[i][j]; 
-            }
-            
-            for (int j = 0; j < num_2nd_nn; j++){
-                infile2 >> second_nn[i][j]; 
+            for (int j = 0; j < num_neighbors; j++){
+                infile2 >> neighbor_list[i][j]; 
             }
         }
         
@@ -508,47 +473,47 @@ int main(int argc, char *argv[]){
     }
     
     
-    //initialize spin configuration
-    double ** si = new double * [N];
-    for (int i = 0; i < N; i++){
-        si[i] = new double [2];
-    }
+    J = new double [num_neighbors];
     
-    initialize(N, si);
-    
-    double M = magnetization (N, si);
-    double H = energy( N, si, first_nn, second_nn, num_nn, J); 
-    
-    ofstream ifile; ifile.open("init.txt");
-    ifile << N << "\n";
-    
-    //print initial config to file
-    for (int i = 0 ; i < N; i++)
-    {
-        double theta = si[i][0];
-        double phi = si[i][1];
-        ifile << i << "\t" << theta << "\t" << phi << "\n";
+    for (int i = 0; i < num_neighbors; i++){
+        if (i<num_1st_nn) J[i] = J1;
+        else if (i >= num_1st_nn || i < num_2nd_nn)
+            J[i] = J2;
         
     }
-    ifile.close();
     
+    double **si = new double* [N];
+    for (int i = 0; i < N; i++){
+        si[i] = new double [5];
+    }
+    
+   
+    //random initialization
+    initialize( N,  si);
+
+   
+    
+    //temperature steps
+    //1-initialize list of temperature values:
     double * temps = new double [15];
     temp_init(temps);
     
-
-    for (int t = 0; t < 13; t++){
+    
+    //2-loop over temperature values
+    for (int i = 0; i < 15; i++){
         
-        temperature = temps[t];
-        temp_step( N, si, first_nn, second_nn, num_nn, J, temperature, MCSteps, sampling_freq );
+        double temperature = temps[i];
+        temp_step( N, si, num_neighbors, neighbor_list, J,temperature, MCSteps, sampling_freq);
         
-        cout << "done T = " << temperature << "\n";
     }
-
-     
-    free(si);
     
+    
+    
+       free(si);
+       free (temps);
+       free(neighbor_list);
+       free(J);
+        
+
     return 0;
-    
 }
-
-
