@@ -1,0 +1,48 @@
+ &control
+
+    calculation = 'scf',
+    pseudo_dir = './pseudo',
+    outdir='./temp.a2'
+    prefix='mnau2',
+ /
+ &system
+    ibrav=  0, 
+    nat=  12, 
+    ntyp= 5,
+    ecutwfc = 30.0, ecutrho = 300.0,
+    occupations='tetrahedra', smearing='gauss', degauss=0.02,
+    nspin=2, 
+    starting_magnetization(1)= 1.0,
+    starting_magnetization(2)= 1.0,
+    starting_magnetization(3)= -1.0,
+    starting_magnetization(4)= -1.0,
+ /
+ &electrons
+    mixing_beta = 0.05 
+ /
+CELL_PARAMETERS angstrom
+4.8010270000         0.0000000000         0.0000000000
+0.0000000000         4.8010270000         0.0000000000
+0.0000000000         0.0000000000         8.8806360000
+ATOMIC_SPECIES
+ Mn1    1.  Mn.pbe-sp-hgh.UPF
+ Mn2    1.  Mn.pbe-sp-hgh.UPF
+ Mn3    1.  Mn.pbe-sp-hgh.UPF
+ Mn4    1.  Mn.pbe-sp-hgh.UPF 
+ Au    1.  Au.pbe-nd-rrkjus.UPF 
+ATOMIC_POSITIONS crystal
+Mn1   0    0    0
+Mn2   0.5  0.5  0
+Au    0.5  0    0.840319
+Au    1    0.5  0.840319
+Au    0.5  0    0.159681
+Au    1    0.5  0.159681
+Mn3   0.5  0    0.5
+Mn4   1    0.5  0.5
+Au    0    0    0.340319
+Au    0.5  0.5  0.340319
+Au    0    0    0.659681
+Au   0.5  0.5  0.659681
+K_POINTS automatic
+16 16 16 0 0 0
+

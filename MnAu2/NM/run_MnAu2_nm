@@ -1,5 +1,0 @@
-#!/bin/bash
-
-./run_MnAu2_nm-scf
-./run_MnAu2_nm-nscf
-./run_MnAu2_nm-bands

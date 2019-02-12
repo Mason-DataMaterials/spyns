@@ -1,9 +1,0 @@
-&DOS
-    outdir='./temp'
-    prefix='mnau2'
-    fildos='results_MnAu2_fm/mnau2.dos'
-    degauss = 0.007d0,
-    ngauss = 0
-    DeltaE=0.1
- /
-

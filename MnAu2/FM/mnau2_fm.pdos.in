@@ -1,8 +1,0 @@
- &PROJWFC
-    outdir='./temp '
-    prefix='mnau2'
-    degauss = 0.007d0,
-    ngauss = 0
-    DeltaE=0.1
- /
-
