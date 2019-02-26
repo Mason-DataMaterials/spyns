@@ -1,0 +1,117 @@
+ &control
+
+    calculation = 'scf',
+    pseudo_dir = './pseudo',
+    outdir='./temp.nm'
+    prefix='mnau2',
+ /
+ &system
+    ibrav=  0, 
+    nat=  54, 
+    ntyp= 19,
+    ecutwfc = 45.0, ecutrho = 400.0,
+    occupations='tetrahedra'
+    nspin=2, 
+    starting_magnetization(1)= 0.0,
+    starting_magnetization(2)= 0.0,
+    starting_magnetization(3)= 0.0,
+    starting_magnetization(4)= 0.0,
+    starting_magnetization(5)= 0.0,
+    starting_magnetization(6)= 0.0,
+    starting_magnetization(7)= 0.0,
+    starting_magnetization(8)= 0.0,
+    starting_magnetization(9)= 0.0,
+    starting_magnetization(10)= 0.0,
+    starting_magnetization(11)= 0.0,
+    starting_magnetization(12)= 0.0,
+    starting_magnetization(13)= 0.0,
+    starting_magnetization(14)= 0.0,
+    starting_magnetization(15)= 0.0,
+    starting_magnetization(16)= 0.0,
+    starting_magnetization(17)= 0.0,
+    starting_magnetization(18)= 0.0,
+ /
+ &electrons
+    mixing_beta = 0.10
+ /
+CELL_PARAMETERS angstrom
+10.1845160000         0.0000000000         0.0000000000
+ 0.0000000000        10.1845160000         0.0000000000
+ 0.0000000000         0.0000000000         8.8806360000
+ATOMIC_SPECIES
+ Mn1     54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn2     54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn3     54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn4     54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn5     54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn6     54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn7     54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn8     54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn9     54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn10    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn11    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn12    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn13    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn14    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn15    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn16    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn17    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn18    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Au     196.966  Au.pbe-dn-kjpaw_psl.0.1.UPF 
+ATOMIC_POSITIONS crystal
+Mn1    0.00000 0.00000 0.00000
+Mn2    0.00000 0.33333 0.00000
+Mn3    0.00000 0.66667 0.00000
+Mn4    0.33333 0.00000 0.00000
+Mn5    0.33333 0.33333 0.00000
+Mn6    0.33333 0.66667 0.00000
+Mn7    0.66667 0.00000 0.00000
+Mn8    0.66667 0.33333 0.00000
+Mn9    0.66667 0.66667 0.00000
+Mn10    0.16667 0.16667 0.50000
+Mn11    0.16667 0.50000 0.50000
+Mn12    0.16667 0.83333 0.50000
+Mn13    0.50000 0.16667 0.50000
+Mn14    0.50000 0.50000 0.50000
+Mn15    0.50000 0.83333 0.50000
+Mn16    0.83333 0.16667 0.50000
+Mn17    0.83333 0.50000 0.50000
+Mn18    0.83333 0.83333 0.50000
+Au    0.16667 0.16667 0.84032
+Au    0.16667 0.50000 0.84032
+Au    0.16667 0.83333 0.84032
+Au    0.50000 0.16667 0.84032
+Au    0.50000 0.50000 0.84032
+Au    0.50000 0.83333 0.84032
+Au    0.83333 0.16667 0.84032
+Au    0.83333 0.50000 0.84032
+Au    0.83333 0.83333 0.84032
+Au    0.16667 0.16667 0.15968
+Au    0.16667 0.50000 0.15968
+Au    0.16667 0.83333 0.15968
+Au    0.50000 0.16667 0.15968
+Au    0.50000 0.50000 0.15968
+Au    0.50000 0.83333 0.15968
+Au    0.83333 0.16667 0.15968
+Au    0.83333 0.50000 0.15968
+Au    0.83333 0.83333 0.15968
+Au    0.00000 0.00000 0.34032
+Au    0.00000 0.33333 0.34032
+Au    0.00000 0.66667 0.34032
+Au    0.33333 0.00000 0.34032
+Au    0.33333 0.33333 0.34032
+Au    0.33333 0.66667 0.34032
+Au    0.66667 0.00000 0.34032
+Au    0.66667 0.33333 0.34032
+Au    0.66667 0.66667 0.34032
+Au    0.00000 0.00000 0.65968
+Au    0.00000 0.33333 0.65968
+Au    0.00000 0.66667 0.65968
+Au    0.33333 0.00000 0.65968
+Au    0.33333 0.33333 0.65968
+Au    0.33333 0.66667 0.65968
+Au    0.66667 0.00000 0.65968
+Au    0.66667 0.33333 0.65968
+Au    0.66667 0.66667 0.65968
+K_POINTS automatic
+2 2 2 0 0 0

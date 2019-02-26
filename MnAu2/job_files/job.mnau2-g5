@@ -1,0 +1,25 @@
+#!/bin/bash
+#SBATCH -J mnau2-g5
+#SBATCH -o /scratch/ssilayi/spyns/MnAu2/logs/log.mnau2-g5
+#SBATCH -e /scratch/ssilayi/spyns/MnAu2/logs/mnau2-g5.err
+#SBATCH --mail-user=ssilayi@gmu.edu
+#SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE,TIMELIMIT_80
+#SBATCH --qos=normal
+#SBATCH --partition=all-LoPri
+#SBATCH --mem=8000
+#SBATCH --time=5-00:00:00
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=16
+
+
+
+##. /etc/profile
+
+#module load qe/6.3.0
+
+module load intel-mpi/64/5.1.2/150 
+module load QuantumEspresso/6.2.1
+
+# Run the executable.  Note the -np option is required 
+mpirun -np 32 pw.x  < input_files/mnau2_g5.scf.in > output_files/g5.scf.out
+
