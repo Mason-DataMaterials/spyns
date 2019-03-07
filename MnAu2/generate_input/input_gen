@@ -1,0 +1,53 @@
+#!/bin/bash
+
+for i in $(seq 176 1 200)
+do
+	printf "awk '{print \$$i}' mg_patterns-g.list \n" > awk_line
+
+	bash awk_line > pattern
+
+	paste  -d " " pattern coords > coords.in
+	rm awk_line
+
+cat > $i.scf.in << EOF
+ &control
+
+    calculation = 'scf',
+    pseudo_dir = './pseudo',
+    outdir='./temp.5'
+    prefix='mnau2',
+ /
+ &system
+    ibrav=  0, 
+    nat=  54, 
+    ntyp= 3,
+    ecutwfc = 45.0, ecutrho = 400.0,
+    occupations='tetrahedra'
+    nspin=2, 
+    starting_magnetization(1)= 0.8,
+    starting_magnetization(2)= -0.8,
+     /
+ &electrons
+    mixing_beta = 0.10
+ /
+CELL_PARAMETERS angstrom
+10.1845160000         0.0000000000         0.0000000000
+ 0.0000000000        10.1845160000         0.0000000000
+ 0.0000000000         0.0000000000         8.8806360000
+ATOMIC_SPECIES
+ Mn1    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn2    54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Au     196.966  Au.pbe-dn-kjpaw_psl.0.1.UPF 
+ATOMIC_POSITIONS crystal
+K_POINTS automatic
+2 2 2 0 0 0
+EOF
+
+	sed -i -e '/ATOMIC_POSITIONS crystal/rcoords.in' $i.scf.in
+	mv $i.scf.in ../input_files/.
+
+	rm {pattern,coords.in}
+
+done
+
+

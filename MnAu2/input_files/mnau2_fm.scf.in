@@ -1,4 +1,5 @@
  &control
+
     calculation = 'scf',
     pseudo_dir = './pseudo',
     outdir='./temp.fm'
@@ -12,7 +13,7 @@
     occupations='tetrahedra'
     nspin=2, 
     starting_magnetization(1)= 0.8,
-    /
+     /
  &electrons
     mixing_beta = 0.10
  /
@@ -79,4 +80,4 @@ Au    0.66667 0.00000 0.65968
 Au    0.66667 0.33333 0.65968
 Au    0.66667 0.66667 0.65968
 K_POINTS automatic
-1 1 1 0 0 0
+2 2 2 0 0 0

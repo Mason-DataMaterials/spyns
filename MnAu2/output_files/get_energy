@@ -1,0 +1,33 @@
+#!/bin/bash
+
+rm -r energy.out
+
+for i in $(seq 1 1 200)
+do
+	if [ -e $i.scf.out ]; then
+
+        	energy=$(grep "total energy " $i.scf.out | tail -n 2 | head -n 1 | awk '{print $5}')
+  
+        	if [ "$energy" == "Ry" ]; then
+        
+        	        energy=$(grep "total energy " $i.scf.out | tail -n 1 | awk '{print $4}')
+                fi
+                
+	        printf "g-$i  18  $energy \n" >> energy.out
+        fi
+
+done
+
+cat > energy_map.gnu << EOF
+set term png
+set output "energy_map.png"
+set xrange [-0.0025:0.0025]
+set ylabel "Energy (Ry)"
+
+plot "energy.nm" u (\$2-18):3 w p pt 7 ps 2 t "nm",\
+     "energy.fm" u (\$2-18):3 w p pt 7 ps 2 t "fm",\
+     "energy.out" u (\$2-18):3 w p pt 7  t "g-types"
+EOF
+
+gnuplot energy_map.gnu
+rm energy_map.gnu
