@@ -2,6 +2,8 @@
 
 rm -r energy.out
 
+head -n 2 energy.nm-fm > energy.out
+
 for i in $(seq 1 1 200)
 do
 	if [ -e $i.scf.out ]; then
@@ -13,7 +15,7 @@ do
         	        energy=$(grep "total energy " $i.scf.out | tail -n 1 | awk '{print $4}')
                 fi
                 
-	        printf "g-$i  18  $energy \n" >> energy.out
+	        printf "g-$i,  18,  $energy \n" >> energy.out
         fi
 
 done
@@ -31,3 +33,5 @@ EOF
 
 gnuplot energy_map.gnu
 rm energy_map.gnu
+
+cp energy.out ../data/energy.out.200
