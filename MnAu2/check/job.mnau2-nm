@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH -J mnau2-nm
+#SBATCH -o /scratch/ssilayi/spyns/MnAu2/check/log.nm1
+#SBATCH -e /scratch/ssilayi/spyns/MnAu2/check/nm1.err
+#SBATCH --mail-user=ssilayi@gmu.edu
+#SBATCH --mail-type=BEGIN,END,FAIL,REQUEUE,TIMELIMIT_80
+#SBATCH --qos=normal
+#SBATCH --partition=all-LoPri
+#SBATCH --mem=15000
+#SBATCH --time=5-00:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=16
+
+
+module load intel/mkl/64/11.3.4/2016.4.258
+module load intel/compiler/64/16.0.4/2016.4.258
+module load intel-mpi/64/5.1.2/150 
+#module load QuantumEspresso/6.2.1
+module load quantum-espresso/6.3
+# Run the executable.  Note the -np option is required 
+mpirun -np 16  pw.x  < mnau2_nm.scf.in > nm.scf.out
