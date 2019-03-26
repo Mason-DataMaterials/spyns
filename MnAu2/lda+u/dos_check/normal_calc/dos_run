@@ -1,0 +1,36 @@
+echo "Done nscf calculation, starting DOS ..."
+
+cat > mnau2_fm.dos.in << EOF
+&DOS
+    outdir='$temp'
+    prefix='mnau2'
+    fildos='$results/mnau2.dos'
+    degauss = 0.007d0,
+    ngauss = 0
+    DeltaE=0.1
+ /
+
+EOF
+
+
+dos.x < mnau2_fm.dos.in  > $results/mnau2.dos.out
+
+
+echo "Done DOS, starting pDOS ..."
+
+cat > mnau2_fm.pdos.in << EOF
+ &PROJWFC
+    outdir='$temp '
+    prefix='mnau2'
+    degauss = 0.007d0,
+    ngauss = 0
+    DeltaE=0.1
+ /
+
+EOF
+
+
+projwfc.x < mnau2_fm.pdos.in  > $results/mnau2.pdos.out
+mv mnau2.pdos_* $results/.
+
+

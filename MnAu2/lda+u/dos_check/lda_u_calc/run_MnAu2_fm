@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./run_MnAu2_fm-scf
+./run_MnAu2_fm-nscf
+./run_MnAu2_fm-bands

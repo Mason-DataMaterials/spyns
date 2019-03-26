@@ -1,0 +1,52 @@
+#!/bin/bash
+n=1
+for i in $(seq 2 1 18)
+do
+	printf "awk '{print \"    \"\$1 \$$i}' mg_patterns_unique \n" > awk_line
+	bash awk_line > pattern
+
+	rm awk_line
+
+cat > $n.scf.in << EOF
+ &control
+
+    calculation = 'scf',
+    pseudo_dir = './pseudo',
+    outdir='./temp.$n'
+    prefix='mnau2',
+ /
+ &system
+    ibrav=  0, 
+    nat=  24, 
+    ntyp= 9,
+    ecutwfc = 45.0, ecutrho = 400.0,
+    occupations='tetrahedra'
+    nspin=2,
+    lda_plus_u = .true.
+    lda_plus_u_kind = 1
+    Hubbard_U(1)= 3.12, Hubbard_J(1,1) = 0.7,
+    Hubbard_U(2)= 3.12, Hubbard_J(2,1) = 0.7,
+    Hubbard_U(3)= 3.12, Hubbard_J(3,1) = 0.7,
+    Hubbard_U(4)= 3.12, Hubbard_J(4,1) = 0.7,
+    Hubbard_U(5)= 3.12, Hubbard_J(5,1) = 0.7,
+    Hubbard_U(6)= 3.12, Hubbard_J(6,1) = 0.7,
+    Hubbard_U(7)= 3.12, Hubbard_J(7,1) = 0.7,
+    Hubbard_U(8)= 3.12, Hubbard_J(8,1) = 0.7,
+     /
+ &electrons
+    mixing_beta = 0.10
+ /
+CELL_PARAMETERS angstrom
+K_POINTS automatic
+2 2 2 0 0 0
+EOF
+
+	sed -i -e '/nspin=2/rpattern' $n.scf.in
+	sed -i -e '/CELL_PARAMETERS angstrom/rmn8au16.structure' $n.scf.in
+	mv $n.scf.in ../lda+u/input_files/.
+
+	rm pattern
+        n=$(( $n + 1 ))
+done
+
+

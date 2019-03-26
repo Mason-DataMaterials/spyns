@@ -1,0 +1,303 @@
+
+     Program PWSCF v.6.1 (svn rev. 13369) starts on 25Mar2019 at  9:35: 0 
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI), running on     4 processors
+     R & G space division:  proc/nbgrp/npool/nimage =       4
+     Waiting for input...
+     Reading input from standard input
+
+     Current dimensions of program PWSCF are:
+     Max number of different atomic species (ntypx) = 10
+     Max number of k-points (npk) =  40000
+     Max angular momentum in pseudopotentials (lmaxx) =  3
+
+     Atomic positions and unit cell read from directory:
+     ./temp/mnau2.save/
+
+               file Mn.pbe-spn-kjpaw_psl.0.3.1.UPF: wavefunction(s)  3P 3D renormalized
+               file Au.pbe-dn-kjpaw_psl.0.1.UPF: wavefunction(s)  6S 6P 5D renormalized
+
+     Subspace diagonalization in iterative solution of the eigenvalue problem:
+     a serial algorithm will be used
+
+     warning: symmetry operation #  2 not compatible with FFT grid. 
+  -1   0   0
+   0  -1   0
+   1   1   1
+     warning: symmetry operation #  3 not compatible with FFT grid. 
+  -1   0   0
+   0   1   0
+   0  -1  -1
+     warning: symmetry operation #  4 not compatible with FFT grid. 
+   1   0   0
+   0  -1   0
+  -1   0  -1
+     warning: symmetry operation #  5 not compatible with FFT grid. 
+   0   1   0
+   1   0   0
+  -1  -1  -1
+     warning: symmetry operation #  7 not compatible with FFT grid. 
+   0  -1   0
+   1   0   0
+   0   1   1
+     warning: symmetry operation #  8 not compatible with FFT grid. 
+   0   1   0
+  -1   0   0
+   1   0   1
+     warning: symmetry operation # 10 not compatible with FFT grid. 
+   1   0   0
+   0   1   0
+  -1  -1  -1
+     warning: symmetry operation # 11 not compatible with FFT grid. 
+   1   0   0
+   0  -1   0
+   0   1   1
+     warning: symmetry operation # 12 not compatible with FFT grid. 
+  -1   0   0
+   0   1   0
+   1   0   1
+     warning: symmetry operation # 13 not compatible with FFT grid. 
+   0  -1   0
+  -1   0   0
+   1   1   1
+     warning: symmetry operation # 15 not compatible with FFT grid. 
+   0   1   0
+  -1   0   0
+   0  -1  -1
+     warning: symmetry operation # 16 not compatible with FFT grid. 
+   0  -1   0
+   1   0   0
+  -1   0  -1
+
+     Parallelization info
+     --------------------
+     sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
+     Min         243     144     46                 7360     3408     628
+     Max         244     145     47                 7363     3413     631
+     Sum         973     577    185                29445    13639    2517
+
+
+
+     bravais-lattice index     =            0
+     lattice parameter (alat)  =       6.3686  a.u.
+     unit-cell volume          =     335.6689 (a.u.)^3
+     number of atoms/cell      =            3
+     number of atomic types    =            2
+     number of electrons       =        37.00
+     number of Kohn-Sham states=           23
+     kinetic-energy cutoff     =      45.0000  Ry
+     charge density cutoff     =     300.0000  Ry
+     Exchange-correlation      =  SLA  PW   PBX  PBC ( 1  4  3  4 0 0)
+
+     celldm(1)=   6.368621  celldm(2)=   0.000000  celldm(3)=   0.000000
+     celldm(4)=   0.000000  celldm(5)=   0.000000  celldm(6)=   0.000000
+
+     crystal axes: (cart. coord. in units of alat)
+               a(1) = (   1.000000   0.000000   0.000000 )  
+               a(2) = (   0.000000   1.000000   0.000000 )  
+               a(3) = (  -0.500000  -0.500000   1.299496 )  
+
+     reciprocal axes: (cart. coord. in units 2 pi/alat)
+               b(1) = (  1.000000 -0.000000  0.384765 )  
+               b(2) = ( -0.000000  1.000000  0.384765 )  
+               b(3) = (  0.000000  0.000000  0.769529 )  
+
+
+     PseudoPot. # 1 for Mn read from file:
+     ../../pseudo/Mn.pbe-spn-kjpaw_psl.0.3.1.UPF
+     MD5 check sum: 7eef95dd2aae66803482eea66ebeebf1
+     Pseudo is Projector augmented-wave + core cor, Zval = 15.0
+     Generated using "atomic" code by A. Dal Corso  v.5.0.99 svn rev. 10869
+     Shape of augmentation charge: PSQ
+     Using radial grid of 1187 points,  6 beta functions with: 
+                l(1) =   0
+                l(2) =   0
+                l(3) =   1
+                l(4) =   1
+                l(5) =   2
+                l(6) =   2
+     Q(r) pseudized with 0 coefficients 
+
+
+     PseudoPot. # 2 for Au read from file:
+     ../../pseudo/Au.pbe-dn-kjpaw_psl.0.1.UPF
+     MD5 check sum: 5c9b92683623e7ae2ab3f8e525febab6
+     Pseudo is Projector augmented-wave + core cor, Zval = 11.0
+     Generated using "atomic" code by A. Dal Corso  v.5.0.2 svn rev. 9415
+     Shape of augmentation charge: PSQ
+     Using radial grid of 1279 points,  6 beta functions with: 
+                l(1) =   0
+                l(2) =   0
+                l(3) =   1
+                l(4) =   1
+                l(5) =   2
+                l(6) =   2
+     Q(r) pseudized with 0 coefficients 
+
+
+     atomic species   valence    mass     pseudopotential
+        Mn            15.00     1.00000     Mn( 1.00)
+        Au            11.00     1.00000     Au( 1.00)
+
+     Starting magnetic structure 
+     atomic species   magnetization
+        Mn           1.000
+        Au           0.000
+
+
+     Full LDA+U calculation (l_max = 2) with parameters (eV):
+     U(  1) =   3.1200   J(  1) =   0.7000   B(  1) =   0.0803
+
+
+
+      4 Sym. Ops., with inversion, found
+
+
+
+   Cartesian axes
+
+     site n.     atom                  positions (alat units)
+         1           Mn  tau(   1) = (   0.0000000   0.0000000   0.0000000  )
+         2           Au  tau(   2) = (  -0.0000000  -0.0000000   0.8836570  )
+         3           Au  tau(   3) = (   0.4999999   0.4999999   0.4158386  )
+
+     number of k points=  1098  Marzari-Vanderbilt smearing, width (Ry)=  0.0200
+
+     Number of k-points >= 100: set verbosity='high' to print them.
+
+     Dense  grid:    29445 G-vectors     FFT dimensions: (  36,  36,  54)
+
+     Smooth grid:    13639 G-vectors     FFT dimensions: (  27,  27,  45)
+
+     Estimated max dynamical RAM per process >       5.13MB
+
+     Estimated total allocated dynamical RAM >      20.52MB
+     Generating pointlists ...
+     new r_m :   0.3384 (alat units)  2.1550 (a.u.) for type    1
+     new r_m :   0.3384 (alat units)  2.1550 (a.u.) for type    2
+
+     Check: negative/imaginary core charge=   -0.000007    0.000000
+
+     The potential is recalculated from file :
+     ./temp/mnau2.save/charge-density.dat
+
+     Number of +U iterations with fixed ns =  0
+     Starting occupations:
+ --- enter write_ns ---
+ LDA+U parameters:
+U(  1) =   3.1200   J(  1) =   0.7000   B(  1) =   0.0803
+atom    1   Tr[ns(na)] (up, down, total) =   4.96309  0.80899  5.77208
+   spin  1
+    eigenvalues: 
+  0.982  0.992  0.992  0.996  1.001
+    eigenvectors:
+  0.000  0.000  0.000  1.000  0.000
+  0.000  0.500  0.500  0.000  0.000
+  0.000  0.500  0.500  0.000  0.000
+  0.000  0.000  0.000  0.000  1.000
+  1.000  0.000  0.000  0.000  0.000
+    occupations:
+  0.996 -0.000 -0.000 -0.000  0.000
+ -0.000  0.992 -0.000  0.000 -0.000
+ -0.000 -0.000  0.992 -0.000 -0.000
+ -0.000  0.000 -0.000  1.001 -0.000
+  0.000 -0.000 -0.000 -0.000  0.982
+   spin  2
+    eigenvalues: 
+  0.066  0.153  0.155  0.156  0.279
+    eigenvectors:
+  0.000  0.015  0.000  0.985  0.000
+  0.000  0.493  0.500  0.007  0.000
+  0.000  0.493  0.500  0.007  0.000
+  1.000  0.000  0.000  0.000  0.000
+  0.000  0.000  0.000  0.000  1.000
+    occupations:
+  0.156  0.000  0.000 -0.000 -0.000
+  0.000  0.154 -0.001  0.000 -0.000
+  0.000 -0.001  0.154 -0.000 -0.000
+ -0.000  0.000 -0.000  0.066 -0.000
+ -0.000 -0.000 -0.000 -0.000  0.279
+atomic mag. moment =     4.154093
+N of occupied +U levels =    5.772079
+ --- exit write_ns ---
+ Atomic wfc used for LDA+U Projector are NOT orthogonalized
+     Starting wfc are   28 randomized atomic wfcs
+     Checking if some PAW data can be deallocated... 
+
+     Band Structure Calculation
+     Davidson diagonalization with overlap
+     c_bands:  1 eigenvalues not converged
+
+     ethr =  2.70E-09,  avg # of iterations = 14.0
+
+     total cpu time spent up to now is     3467.5 secs
+
+     End of band structure calculation
+
+     Number of k-points >= 100: set verbosity='high' to print the bands.
+
+     the Fermi energy is    15.4679 ev
+
+     Writing output data file mnau2.save
+
+     init_run     :     30.89s CPU     51.86s WALL (       1 calls)
+     electrons    :   2110.17s CPU   3413.48s WALL (       1 calls)
+
+     Called by init_run:
+     wfcinit      :     28.48s CPU     47.82s WALL (       1 calls)
+     potinit      :      0.85s CPU      1.43s WALL (       1 calls)
+
+     Called by electrons:
+     c_bands      :   2110.12s CPU   3413.39s WALL (       1 calls)
+     v_of_rho     :      0.09s CPU      0.11s WALL (       1 calls)
+     newd         :      0.08s CPU      0.23s WALL (       1 calls)
+     PAW_pot      :      0.69s CPU      1.20s WALL (       1 calls)
+
+     Called by c_bands:
+     init_us_2    :      1.32s CPU      2.18s WALL (    4392 calls)
+     cegterg      :   1876.31s CPU   3034.59s WALL (    2303 calls)
+
+     Called by sum_band:
+
+     Called by *egterg:
+     h_psi        :   1362.83s CPU   2202.71s WALL (   35292 calls)
+     s_psi        :     22.08s CPU     34.79s WALL (   37488 calls)
+     g_psi        :      1.69s CPU      2.78s WALL (   30793 calls)
+     cdiaghg      :    178.01s CPU    292.85s WALL (   32989 calls)
+
+     Called by h_psi:
+     h_psi:pot    :   1244.94s CPU   2010.66s WALL (   35292 calls)
+     h_psi:calbec :    146.63s CPU    234.42s WALL (   35292 calls)
+     vloc_psi     :   1078.64s CPU   1745.13s WALL (   35292 calls)
+     add_vuspsi   :     19.55s CPU     30.93s WALL (   35292 calls)
+     vhpsi        :    116.51s CPU    189.95s WALL (   35292 calls)
+
+     General routines
+     calbec       :    285.47s CPU    462.47s WALL (   72780 calls)
+     fft          :      0.21s CPU      0.36s WALL (      23 calls)
+     ffts         :      0.01s CPU      0.01s WALL (       2 calls)
+     fftw         :   1060.89s CPU   1718.44s WALL (  920934 calls)
+     interpolate  :      0.02s CPU      0.02s WALL (       2 calls)
+     davcio       :      0.37s CPU      1.99s WALL (    6588 calls)
+
+     Parallel routines
+     fft_scatter  :    938.75s CPU   1527.16s WALL (  920959 calls)
+
+     Hubbard U routines
+     vhpsi        :    116.51s CPU    189.95s WALL (   35292 calls)
+
+     PWSCF        : 35m45.73s CPU    57m53.94s WALL
+
+
+   This run was terminated on:  10:32:54  25Mar2019            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=

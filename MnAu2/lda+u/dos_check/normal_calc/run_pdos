@@ -1,0 +1,21 @@
+#!/bin/bash
+temp='./temp'
+pseudo='../pseudo'
+results='results_MnAu2_fm'
+
+
+cat > mnau2_fm.pdos.in << EOF
+ &PROJWFC
+    outdir='$temp '
+    prefix='mnau2'
+    degauss = 0.007d0,
+    ngauss = 0
+    DeltaE=0.1
+ /
+EOF
+
+
+mpirun -np 4 projwfc.x < mnau2_fm.pdos.in  > $results/mnau2.pdos.out
+mv mnau2.pdos_* $results/.
+
+
