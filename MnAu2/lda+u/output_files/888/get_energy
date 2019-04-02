@@ -1,0 +1,20 @@
+#!/bin/bash
+
+rm -r energy.out.collinear.csv
+
+for i in $(seq 1 1 200)
+do
+	if [ -e $i.scf.out ]; then
+
+        	energy=$(grep "total energy " $i.scf.out | tail -n 2 | head -n 1 | awk '{print $5}')
+  
+      #  	if [ "$energy" == "Ry" ]; then
+      #  
+      #  	        energy=$(grep "total energy " $i.scf.out | tail -n 1 | awk '{print $4}')
+      #          fi
+                
+	        printf "c-$i,24,$energy \n" >> energy.out.collinear.csv
+        fi
+
+done
+
