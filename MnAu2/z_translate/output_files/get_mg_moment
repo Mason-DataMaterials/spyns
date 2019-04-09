@@ -6,7 +6,7 @@ grep -A 24 "Magnetic moment per site" nm.scf.out | head -n 9 | tail -n 8 | awk '
 #paste nm fm > mg_moment
 
 
-for i in $(seq 1  1  17)
+for i in $(seq 1  1  19)
 do
 
   if [ -e $i.scf.out ]; then

@@ -38,14 +38,14 @@ cat > $i.scf.in << EOF
 CELL_PARAMETERS angstrom
  3.3948385200         0.0000000000         0.0000000000
  0.0000000000         3.3948385200         0.0000000000
- 0.0000000000         0.0000000000        35.5225455600
+ 0.0000000000         0.0000000000        35.0345200000
 ATOMIC_SPECIES
  Mn1   54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
  Mn2   54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
  Au   196.966  Au.pbe-dn-kjpaw_psl.0.1.UPF 
 ATOMIC_POSITIONS crystal
 K_POINTS automatic
-6 6 6 0 0 0
+8 8 4 0 0 0
 EOF
 
 	sed -i -e '/ATOMIC_POSITIONS crystal/rpattern' $i.scf.in

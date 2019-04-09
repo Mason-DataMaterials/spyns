@@ -3,7 +3,7 @@ data_MnAu2
 _symmetry_space_group_name_H-M   'P 1'
 _cell_length_a   3.39483852
 _cell_length_b   3.39483852
-_cell_length_c   35.52254556
+_cell_length_c  35.03452000
 _cell_angle_alpha   90.00000000
 _cell_angle_beta   90.00000000
 _cell_angle_gamma   90.00000000
