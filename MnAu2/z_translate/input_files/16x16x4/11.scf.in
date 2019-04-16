@@ -1,21 +1,8 @@
-#!/bin/bash
-n=1
-for i in $(seq 3 1 19)
-do
-	printf "awk '{print \$$i}' mg_patterns_z.list \n" > awk_line
-	bash awk_line > pattern.$i
-
-	paste -d "  " pattern.$i coords_z > pattern
-
-        
-	rm awk_line
-
-cat > $i.scf.in << EOF
  &control
 
     calculation = 'scf',
     pseudo_dir = './pseudo',
-    outdir='./temp.z$i'
+    outdir='./temp.z11'
     prefix='mnau2',
  /
  &system
@@ -44,15 +31,29 @@ ATOMIC_SPECIES
  Mn2   54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
  Au   196.966  Au.pbe-dn-kjpaw_psl.0.1.UPF 
 ATOMIC_POSITIONS crystal
+Mn1 0.0000 0.0000 0.0000
+Mn1 0.5000 0.5000 0.1250
+Mn1 0.0000 0.0000 0.2500
+Mn2 0.5000 0.5000 0.3750
+Mn1 0.0000 0.0000 0.5000
+Mn1 0.5000 0.5000 0.6250
+Mn2 0.0000 0.0000 0.7500
+Mn2 0.5000 0.5000 0.8750
+Au 0.5000 0.5000 0.0400
+Au 0.0000 0.0000 0.0850
+Au 0.0000 0.0000 0.1650
+Au 0.5000 0.5000 0.2100
+Au 0.5000 0.5000 0.2900
+Au 0.0000 0.0000 0.3350
+Au 0.0000 0.0000 0.4150
+Au 0.5000 0.5000 0.4600
+Au 0.5000 0.5000 0.5400
+Au 0.0000 0.0000 0.5850
+Au 0.0000 0.0000 0.6650
+Au 0.5000 0.5000 0.7100
+Au 0.5000 0.5000 0.7900
+Au 0.0000 0.0000 0.8350
+Au 0.0000 0.0000 0.9150
+Au 0.5000 0.5000 0.9600
 K_POINTS automatic
 16 16 4 0 0 0
-EOF
-
-	sed -i -e '/ATOMIC_POSITIONS crystal/rpattern' $i.scf.in
-	mv $i.scf.in ../input_files/.
-
-	rm pattern pattern.$i 
-
-done
-
-
