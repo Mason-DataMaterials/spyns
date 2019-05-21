@@ -1,0 +1,57 @@
+#!/bin/bash
+n=1
+for i in $(seq 3 1 19)
+do
+	printf "awk '{print \$$i}' mg_patterns_z.list \n" > awk_line
+	bash awk_line > pattern.$i
+
+	paste -d "  " pattern.$i coords_z > pattern
+
+        
+	rm awk_line
+
+cat > $i.scf.in << EOF
+ &control
+
+    calculation = 'scf',
+    pseudo_dir = './pseudo',
+    outdir='./temp.$i'
+    prefix='mnau2',
+ /
+ &system
+    ibrav=  0, 
+    nat=  24, 
+    ntyp= 3,
+    ecutwfc = 45.0, ecutrho = 400.0,
+    occupations='tetrahedra'
+    nspin=2,
+    starting_magnetization(1)= 0.8,
+    starting_magnetization(2)= -0.8,
+    lda_plus_u = .true.,
+    lda_plus_u_kind = 1,
+    Hubbard_U(1)= 3.12, Hubbard_J(1,1) = 0.7,
+    Hubbard_U(2)= 3.12, Hubbard_J(1,2) = 0.7,
+ /
+ &electrons
+    mixing_beta = 0.10
+ /
+CELL_PARAMETERS angstrom
+ 3.3700000000         0.0000000000         0.0000000000
+ 0.0000000000         3.3700000000         0.0000000000
+ 0.0000000000         0.0000000000         35.034520000
+ATOMIC_SPECIES
+ Mn1   54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Mn2   54.938  Mn.pbe-spn-kjpaw_psl.0.3.1.UPF 
+ Au   196.966  Au.pbe-dn-kjpaw_psl.0.1.UPF 
+ATOMIC_POSITIONS crystal
+K_POINTS automatic
+16 16 4 0 0 0
+EOF
+
+	sed -i -e '/ATOMIC_POSITIONS crystal/rpattern' $i.scf.in
+	mv $i.scf.in ./input_files_updated/.
+
+	rm pattern pattern.$i 
+
+done
+
