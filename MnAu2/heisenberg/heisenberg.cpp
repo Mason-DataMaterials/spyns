@@ -5,6 +5,9 @@
 #include <sstream>
 #include <string>
 #include <random>
+#include <algorithm>
+#include<bits/stdc++.h> 
+
 #include <omp.h>
 
 using namespace std;
@@ -33,7 +36,7 @@ double rng_phi(void)
 void temp_init(double * temps)
 {
     int t; //Counters
-    double MAX_TEMP_STEPS = 13.0;
+    double MAX_TEMP_STEPS = 10.0;
     double MAX_TEMP = 1300.0;
     //Temperature array initialization
     for (t = 0; t < MAX_TEMP_STEPS; t++)
@@ -62,8 +65,142 @@ void initialize(int N, double ** si)
        // printf("Initial lattice: %f\t%f\n",si[i][0],si[i][1]);
     }
     
+   
     return;
 }
+
+
+//calculating angles between layers
+void unique_z( int N, double * z, double * z_u, int* count) 
+{ 
+    unordered_set<double> s; 
+    
+    int j = 0;
+    
+    for (int i=0; i<N; i++) 
+    { 
+        if (s.find(z[i])==s.end()) 
+        { 
+            s.insert(z[i]); 
+            z_u[j] = z[i];
+            j++; 
+        } 
+    } 
+    
+    *count = j;
+    
+    return;
+} 
+
+void sort_positions(int N, double ** r, int& n_layers){
+    
+    int i,j,k;
+    double z_val[N], z_list[N];
+    int count;
+    
+    for (i = 0; i < N; i++){
+        z_val[i] = r[i][7];
+    }
+    
+    unique_z( N, z_val, z_list, &count); 
+    
+    
+    for (j =0; j < count; j++ ){
+        
+        for (i = 0; i < N; i++){
+            if(r[i][7] == z_list[j]){
+                r[i][8] = j;
+            }
+            
+        }
+    }
+    
+    n_layers = count;
+    
+    return;
+}
+
+
+double theta( double * u, double * v )
+{
+    
+    double dot_uv = u[0]*v[0] + u[1]*v[1];
+    
+    double u_ = sqrt(u[0]*u[0] + u[1]*u[1]);
+    double v_ = sqrt(v[0]*v[0] + v[1]*v[1]);
+    
+    double cos_theta = dot_uv / ( u_ * v_ );
+    
+    cos_theta = ( cos_theta < -1.0 ? -1.0 : ( cos_theta > 1.0 ? 1.0 : cos_theta ) );
+    
+    double theta = acos ( cos_theta );
+    
+    
+    return theta * ( 180.00 / M_PI); 
+    
+}
+
+
+void xy_per_layer(int N, int n_layers, double ** si, double ** theta_rel){
+    
+    
+    int i,j,k;
+    
+    
+    double ** xy_vector = new double * [n_layers];
+    for (i = 0; i < n_layers; i++){
+        
+        xy_vector[i] = new double [2];
+        theta_rel[i] = new double [2];
+    }
+    
+    
+   //averaging the xy vectors for each layer 
+    for (int i = 0; i < n_layers; i++){
+        
+        int l_count = 0;
+        for (int j = 0; j<N; j++){
+            if (si[j][8] == i ){
+                xy_vector[i][0] += si[j][2]; 
+                xy_vector[i][1] += si[j][3];
+                l_count +=1; 
+            }
+            
+        }
+        
+        xy_vector[i][0] /= l_count;
+        xy_vector[i][1] /= l_count;
+        
+    }
+    
+    for (i = 0; i < n_layers; i++){
+        
+        theta_rel[i][0] = 0.0 ;
+        theta_rel[i][1] = 0.0 ;
+        
+        for (j = 0; j < n_layers; j++){
+            
+        //angles relative to the i layer
+            theta_rel[i][0] += theta(xy_vector[i], xy_vector[j]) ;
+        }
+        
+          theta_rel[i][0] /= n_layers; 
+          
+          //angles relative between layers
+        if (i > 0){
+            theta_rel[i][1] = theta(xy_vector[i-1], xy_vector[i]) ;
+        }
+        
+        
+         //cout << i << "\t" << xy_vector[i][0] << "\t" << xy_vector[i][1] << "\t" << theta_rel[i][0] << "\t" << theta_rel[i][1]<<"\n" ;
+    }
+    
+    
+    
+    return;
+    
+}
+
 
 
 double magnetization(int N, double **si){
@@ -297,7 +434,7 @@ void ave_var(int cc, double &Avg, double &Var, double U)
     Var /= (cc + 1);
 }
 
-void save_data(int N, int MCSteps,double * data)
+void save_data(int N, int MCSteps,double * data, int n_layers, double ** theta)
 {
     
     double T = data[8];
@@ -343,12 +480,26 @@ void save_data(int N, int MCSteps,double * data)
     
     hfile.close();
     
+    
+     /*open file for writing*/
+    ofstream tfile;
+    std::ostringstream tf;
+    tf <<"theta_"<<N<<".txt" ;
+    std::string tmf = tf.str();
+    tfile.open(tmf.c_str(), ios_base::app);
+    
+    for (int i = 0; i < n_layers; i++){
+        
+        tfile << T <<"\t"<< theta[i][0] << "\t" << theta[i][1] <<"\n";
+    }
+    
+    
     return;
 }
 
 
 void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list, double *J,  
-                double temperature, int MCSteps, int sampling_freq){
+                double temperature, int MCSteps, int sampling_freq, int n_layers){
     
     
     //total energy magnetization
@@ -370,6 +521,15 @@ void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list,
     //holder for final calculated quantities
     double * data = new double  [14];
     for (int i =0; i < 14; i++) data[i] = 0.0;
+    
+    //layer angles
+    double ** theta_ave = new double * [n_layers];
+    double ** theta_hold = new double * [n_layers];
+    for (int i = 0; i < n_layers; i++){
+        
+        theta_ave[i] = new double [2];
+        theta_hold[i] = new double [2];
+    }
     
     //Average and Variance
     double MAvg=0.0, HAvg=0.0, MVar=0.0, HVar=0.0;
@@ -396,11 +556,28 @@ void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list,
             ave_var(cc, H2Avg, H2Var, H*H);
             ave_var(cc, M4Avg, M4Var, M*M*M*M);
             //cout << cc <<"\t" <<  H << "\t" << HAvg  << "\n";
+            
+            //calculate the relative angles between layers
+            xy_per_layer(N, n_layers,  si, theta_hold);
+            for (int i = 0; i < n_layers; i++){
+                
+                theta_ave[i][0] += theta_hold[i][0];
+                theta_ave[i][1] += theta_hold[i][1];
+                
+            }
+            
             cc++;
         }
         
     }
     
+    
+    for (int i = 0; i < n_layers; i++){
+        
+        theta_ave[i][0] /= cc;
+        theta_ave[i][1] /= cc;
+        
+    }
     
     //accumulate data
     data[0] = MAvg; data[1] = MVar;
@@ -412,11 +589,17 @@ void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list,
     
     
     //print to file
-    save_data( N, (int) ((double)step/(double)sampling_freq),data);
+    save_data( N, (int) ((double)step/(double)sampling_freq), data, n_layers, theta_ave);
+    
+    
+    
+    
+    
     
     
     free(data);
-    
+    free(theta_ave);
+    free(theta_hold);
     
     return;    
 }
@@ -450,35 +633,53 @@ void save_snapshot(int N, double ** si, double temperature ){
     
 }
 
+
+
+
+
+
 int main(int argc, char *argv[]){
 
     
     int N;
+    int n_count;
+    int * nn;
     int num_neighbors;
     double ** neighbor_list;
+    
+    
     double * J;
+    
+    //parameter values (MeV)
+    double Jxy1 = -4.698681;
+    double Jxy2 = -1.630314;
+    double Jxy3 =  0.408626;
+    double Jz1  = -0.802441;
+    double Jz2  =  1.455574;
+    double Jz3  = -0.021782;
+    double Jz4  = -0.129811;
+    
     
     int MCSteps = 100000;
     int sampling_freq = 50;
     
-    //double J1 = 1.0;
-    //double J2 = 0.0;
-    double J1 = 13.1; //meV
-    double J2 = 13.7; //meV
-    J1 = J1*2.0;
-    J2 = J2*2.0;
     
     //read in tables and build lists
-    int num_1st_nn,num_2nd_nn;
-    ifstream infile2 ("neighbor_lists.txt");
+    ifstream infile2 ("neighbor_list");
     
     if (infile2.is_open())
     {
         
         infile2>>N;
-        infile2>>num_1st_nn>>num_2nd_nn;
+        infile2>> n_count;
         
-        num_neighbors = num_1st_nn + num_2nd_nn;
+        nn = new int [n_count];
+        num_neighbors = 0;
+        
+        for (int i = 0; i < n_count; i++){
+            infile2 >> nn[i];
+            num_neighbors += nn[i];
+        }
         
         //populate neighbor lists
         neighbor_list =  new double * [N];
@@ -497,31 +698,59 @@ int main(int argc, char *argv[]){
         infile2.close();
     }
     else{ 
-        cout << "'neighbor_lists.txt' not found! \n";
+        cout << "file 'neighbor_list' not found! \n";
         return 0; 
     }
     
     
     J = new double [num_neighbors];
-    
-    for (int i = 0; i < num_neighbors; i++){
-        if (i<num_1st_nn) J[i] = J1;
-        else if (i >= num_1st_nn || i < num_2nd_nn)
-            J[i] = J2;
+    int n = 0;
+    for (int i = 0; i < n_count; i++){
+        for (int j = 0; j < nn[i]; j++){
+            
+            if (i == 0) J[n] = Jxy1;
+            else if ( i == 1 ) J[n] = Jxy2;
+            else if ( i == 2 ) J[n] = Jxy3;
+            else if ( i == 3 ) J[n] = Jz1;
+            else if ( i == 4 ) J[n] = Jz2;
+            else if ( i == 5 ) J[n] = Jz3;
+            else  J[n] = Jz4;
+            
+            n = n+1;
+        }
         
     }
+   
     
+   
     double **si = new double* [N];
     for (int i = 0; i < N; i++){
-        si[i] = new double [5];
+        si[i] = new double [8];
     }
     
    
     //random initialization
     initialize( N,  si);
 
-   
     
+    int n_layers;
+    
+    ifstream cfile ("coords");
+    
+    if (cfile.is_open())
+    {
+        for (int i = 0; i < N; i++){
+            
+            cfile >> si[i][5] >> si[i][6] >> si[i][7];
+        }
+    }else{ 
+        cout << "file 'coords' not found! \n";
+        return 0; 
+    }
+    
+    sort_positions(N, si, n_layers);
+    
+   
     //temperature steps
     //1-initialize list of temperature values:
     double * temps = new double [15];
@@ -529,10 +758,10 @@ int main(int argc, char *argv[]){
     
     
     //2-loop over temperature values
-    for (int i = 3; i < 7; i++){
+    for (int i = 0; i < 10; i++){
         
         double temperature = temps[i];
-        temp_step( N, si, num_neighbors, neighbor_list, J,temperature, MCSteps, sampling_freq);
+        temp_step( N, si, num_neighbors, neighbor_list, J,temperature, MCSteps, sampling_freq, n_layers);
         
         //save configuration
         save_snapshot(N, si, temperature );
