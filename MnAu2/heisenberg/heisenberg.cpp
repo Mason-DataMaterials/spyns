@@ -36,7 +36,7 @@ double rng_phi(void)
 void temp_init(double * temps)
 {
     int t; //Counters
-    double MAX_TEMP_STEPS = 10.0;
+    double MAX_TEMP_STEPS = 13.0;
     double MAX_TEMP = 1300.0;
     //Temperature array initialization
     for (t = 0; t < MAX_TEMP_STEPS; t++)
@@ -99,21 +99,10 @@ void sort_positions(int N, double ** r, int& n_layers){
     int count;
     
     for (i = 0; i < N; i++){
-        z_val[i] = r[i][7];
+        z_val[i] = r[i][8];
     }
     
     unique_z( N, z_val, z_list, &count); 
-    
-    
-    for (j =0; j < count; j++ ){
-        
-        for (i = 0; i < N; i++){
-            if(r[i][7] == z_list[j]){
-                r[i][8] = j;
-            }
-            
-        }
-    }
     
     n_layers = count;
     
@@ -141,18 +130,10 @@ double theta( double * u, double * v )
 }
 
 
-void xy_per_layer(int N, int n_layers, double ** si, double ** theta_rel){
+void xy_per_layer(int N, int n_layers, double ** si, double ** xy_vector){
     
     
     int i,j,k;
-    
-    
-    double ** xy_vector = new double * [n_layers];
-    for (i = 0; i < n_layers; i++){
-        
-        xy_vector[i] = new double [2];
-        theta_rel[i] = new double [2];
-    }
     
     
    //averaging the xy vectors for each layer 
@@ -173,28 +154,40 @@ void xy_per_layer(int N, int n_layers, double ** si, double ** theta_rel){
         
     }
     
+    return;
+ 
+ 
+}
+ 
+void relative_theta(int N, int n_layers, double ** si, double ** theta_rel){
+
+
+    int i,j,k;
+    
+    double ** xy_vector = new double * [n_layers];
+    
+    for (i = 0; i < n_layers; i++){
+        xy_vector[i] = new double [2];
+    }
+    
+    xy_per_layer(N,n_layers,si, xy_vector);
+    
     for (i = 0; i < n_layers; i++){
         
         theta_rel[i][0] = 0.0 ;
         theta_rel[i][1] = 0.0 ;
         
-        for (j = 0; j < n_layers; j++){
-            
-        //angles relative to the i layer
-            theta_rel[i][0] += theta(xy_vector[i], xy_vector[j]) ;
-        }
-        
-          theta_rel[i][0] /= n_layers; 
-          
-          //angles relative between layers
-        if (i > 0){
-            theta_rel[i][1] = theta(xy_vector[i-1], xy_vector[i]) ;
-        }
-        
-        
-         //cout << i << "\t" << xy_vector[i][0] << "\t" << xy_vector[i][1] << "\t" << theta_rel[i][0] << "\t" << theta_rel[i][1]<<"\n" ;
-    }
+        int nn1 = i+1;
+	int nn2 = i+2;    
     
+    	if(nn1 > n_layers-1) nn1 = nn1 - n_layers;	
+        if(nn2 > n_layers-1) nn2 = nn2 - n_layers;	
+    
+    	theta_rel[i][0] = theta(xy_vector[i], xy_vector[nn1]) ;
+        theta_rel[i][1] = theta(xy_vector[i], xy_vector[nn2]) ;
+        theta_rel[i][2] = theta(xy_vector[0], xy_vector[i]) ;
+        
+    }
     
     
     return;
@@ -490,7 +483,7 @@ void save_data(int N, int MCSteps,double * data, int n_layers, double ** theta)
     
     for (int i = 0; i < n_layers; i++){
         
-        tfile << T <<"\t"<< theta[i][0] << "\t" << theta[i][1] <<"\n";
+        tfile << T <<"\t"<< theta[i][0] << "\t" << theta[i][1] <<"\t"<< theta[i][2] <<"\n";
     }
     
     
@@ -527,10 +520,18 @@ void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list,
     double ** theta_hold = new double * [n_layers];
     for (int i = 0; i < n_layers; i++){
         
-        theta_ave[i] = new double [2];
-        theta_hold[i] = new double [2];
+        theta_ave[i] = new double [3];
+        theta_hold[i] = new double [3];
     }
-    
+
+
+   for (int i = 0; i < n_layers; i++){
+        
+        theta_ave[i][0]= theta_ave[i][1] = theta_ave[i][2] =  0.0;
+	theta_hold[i][0]= theta_hold[i][1] = theta_hold[i][2] = 0.0;
+
+    }
+  
     //Average and Variance
     double MAvg=0.0, HAvg=0.0, MVar=0.0, HVar=0.0;
     double M2Avg=0.0, H2Avg=0.0, M2Var=0.0, H2Var=0.0;
@@ -558,11 +559,12 @@ void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list,
             //cout << cc <<"\t" <<  H << "\t" << HAvg  << "\n";
             
             //calculate the relative angles between layers
-            xy_per_layer(N, n_layers,  si, theta_hold);
+            relative_theta(N, n_layers,  si, theta_hold);
             for (int i = 0; i < n_layers; i++){
                 
                 theta_ave[i][0] += theta_hold[i][0];
                 theta_ave[i][1] += theta_hold[i][1];
+                theta_ave[i][2] += theta_hold[i][2];
                 
             }
             
@@ -576,6 +578,7 @@ void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list,
         
         theta_ave[i][0] /= cc;
         theta_ave[i][1] /= cc;
+        theta_ave[i][2] /= cc;
         
     }
     
@@ -590,11 +593,6 @@ void temp_step( int N, double ** si, int num_neighbors, double ** neighbor_list,
     
     //print to file
     save_data( N, (int) ((double)step/(double)sampling_freq), data, n_layers, theta_ave);
-    
-    
-    
-    
-    
     
     
     free(data);
@@ -725,7 +723,7 @@ int main(int argc, char *argv[]){
    
     double **si = new double* [N];
     for (int i = 0; i < N; i++){
-        si[i] = new double [8];
+        si[i] = new double [9];
     }
     
    
@@ -741,7 +739,7 @@ int main(int argc, char *argv[]){
     {
         for (int i = 0; i < N; i++){
             
-            cfile >> si[i][5] >> si[i][6] >> si[i][7];
+            cfile >> si[i][5] >> si[i][6] >> si[i][7] >> si[i][8];
         }
     }else{ 
         cout << "file 'coords' not found! \n";
@@ -749,16 +747,15 @@ int main(int argc, char *argv[]){
     }
     
     sort_positions(N, si, n_layers);
-    
    
+    
     //temperature steps
     //1-initialize list of temperature values:
     double * temps = new double [15];
     temp_init(temps);
     
-    
     //2-loop over temperature values
-    for (int i = 0; i < 10; i++){
+    for (int i = 0; i < 13; i++){
         
         double temperature = temps[i];
         temp_step( N, si, num_neighbors, neighbor_list, J,temperature, MCSteps, sampling_freq, n_layers);
@@ -766,7 +763,6 @@ int main(int argc, char *argv[]){
         //save configuration
         save_snapshot(N, si, temperature );
     }
-    
     
     
        free(si);
