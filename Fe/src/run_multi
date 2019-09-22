@@ -1,0 +1,25 @@
+#!/bin/bash
+N=1024
+
+for i in $(seq 00 50 1400)
+do
+  mkdir -p $i
+  cd $i/
+  rm *
+  cp ../heisenberg .
+  cp ../neighbor_lists.txt .
+  
+cat > hinput << EOF  
+temperature = $i 
+external_field(h) = 0.0 
+exchange_constant(1st_nn) = 0.0013376783591 
+exchange_constant(2nd_nn) = 0.000757037752675
+iterations =  150000   
+sampling_frequency = 15000 
+EOF
+
+./heisenberg>&log&
+
+  cd ../  
+done
+

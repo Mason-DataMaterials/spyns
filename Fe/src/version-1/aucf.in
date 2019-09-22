@@ -1,0 +1,5 @@
+number of atoms = 686
+number of steps = 500000
+start temp = 300.0
+end temp = 1350.0
+temp step = 50.0 
