@@ -6,3 +6,10 @@ g++ heisenberg.cpp -Wall -lm -std=c++11 -fopenmp -w -o heisenberg
 To compile and run the AutoCorrelation, update the 'aucf.in' file then:
 g++ aucf.cpp -Wall -lfftw3 -lm -fopenmp -o aucf
 ./aucf
+
+
+Updates:
+Latest version doesn't use the hinput. Requires a "neighbor_list".
+
+Updates:
+Works for the Fe example. 
